@@ -1,15 +1,23 @@
 # GTKSystem.Windows.Forms
+### Introduction
 
-### 介绍
-**Visual Studio原生开发，无需学习，一次编译，跨平台运行**.
-C#桌面应用程序跨平台（windows、linux、macos）开发框架，基于GTK组件开发，使用该框架开发项目，Visual studio可以使用C#的原生winform表单窗体设计器，相同的属性、方法、事件，C#原生开发即可，无需学习。一次编译，跨平台运行。 便于开发跨平台winform软件，便于将C# winform软件升级为跨平台软件。
+Native Visual Studio development, no learning curve, compile once, run cross-platform.
+A cross-platform (Windows, Linux, macOS) C# desktop application framework based on GTK components.
+Using this framework, projects can be developed in Visual Studio with the native C# WinForms designer, using the same properties, methods, and events as standard WinForms. Development is done entirely with familiar C# techniques — no additional learning required.
 
-项目官网：[https://www.gtkapp.com](https://www.gtkapp.com)   
+Compile once and run across platforms.
+It makes cross-platform WinForms application development easy and enables existing C# WinForms applications to be upgraded to cross-platform applications with minimal effort.
 
- 由于github访问困难，想获取最新版本请从Nuget和Gitee平台下载：
- 
-从NuGet下载：https://www.nuget.org/packages/GTKSystem.Windows.Forms
+Project website:
+https://www.gtkapp.com
 
-gitee：https://gitee.com/easywebfactory/gtksystem-windows-forms
+Due to limited access to GitHub in some regions, please obtain the latest versions from NuGet or Gitee:
 
-gitee: https://gitee.com/easywebfactory/gtksystem-windows-forms/releases
+Download from NuGet:
+https://www.nuget.org/packages/GTKSystem.Windows.Forms
+
+Gitee repository:
+https://gitee.com/easywebfactory/gtksystem-windows-forms
+
+Gitee releases:
+https://gitee.com/easywebfactory/gtksystem-windows-forms/releases

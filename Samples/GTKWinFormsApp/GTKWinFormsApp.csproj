@@ -8,6 +8,8 @@
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<IsPublishable>False</IsPublishable>
 		<EnableUnsafeBinaryFormatterSerialization>True</EnableUnsafeBinaryFormatterSerialization>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>$(MSBuildProjectDirectory)\$(MSBuildProjectName).xml</DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
