@@ -1,4 +1,4 @@
-
+ï»¿
 using Cairo;
 using Gdk;
 using Pango;
@@ -15,7 +15,7 @@ namespace System.Drawing
         private Gdk.Rectangle rectangle;
         private Gtk.Widget widget;
         public static Cairo.Context Context;
-        #region ÓÃÓÚÊäÈëÓëÊä³öµÄÊıÖµµ÷Õû²îÖµ
+        #region ç”¨äºè¾“å…¥ä¸è¾“å‡ºçš„æ•°å€¼è°ƒæ•´å·®å€¼
         internal double diff_left { get; set; }
         internal double diff_top { get; set; }
         //internal int diff_right { get; set; }
@@ -197,7 +197,7 @@ namespace System.Drawing
             }
             else if (pen.Brush is LinearGradientBrush lbrush)
             {
-                double maxsize = Math.Max(diff_left + lbrush.Rectangle.Right, diff_top + lbrush.Rectangle.Bottom); //½¥±ä½Ç¶È¶¨Îª·½ĞÎ45¶È
+                double maxsize = Math.Max(diff_left + lbrush.Rectangle.Right, diff_top + lbrush.Rectangle.Bottom); //æ¸å˜è§’åº¦å®šä¸ºæ–¹å½¢45åº¦
                 using Cairo.LinearGradient gradient = new Cairo.LinearGradient(diff_left + lbrush.Rectangle.Left, diff_top + lbrush.Rectangle.Top, maxsize, maxsize);
                 int linearcount = lbrush.LinearColors.Length;
                 int idx = 0;
@@ -205,7 +205,7 @@ namespace System.Drawing
                     gradient.AddColorStop((++idx) / linearcount, new Cairo.Color(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f));
 
                 Cairo.Matrix matrix = new Cairo.Matrix(1, 0, 0, 1, 0, 0);
-                matrix.Rotate(Math.PI * 45 / 180);//»¡¶È
+                matrix.Rotate(Math.PI * 45 / 180);//å¼§åº¦
                 gradient.Matrix = matrix;
                 using Cairo.Pattern pattern = Cairo.Pattern.Lookup(gradient.Handle, false);
                 this.context.SetSource(pattern);
@@ -216,7 +216,7 @@ namespace System.Drawing
             }
             else if (pen.Brush is PathGradientBrush pbrush)
             {
-                double maxsize = Math.Max(diff_left + pbrush.Rectangle.Right, diff_top + pbrush.Rectangle.Bottom); //½¥±ä½Ç¶È¶¨Îª·½ĞÎ45¶È
+                double maxsize = Math.Max(diff_left + pbrush.Rectangle.Right, diff_top + pbrush.Rectangle.Bottom); //æ¸å˜è§’åº¦å®šä¸ºæ–¹å½¢45åº¦
                 using Cairo.LinearGradient gradient = new Cairo.LinearGradient(diff_left + pbrush.Rectangle.Left, diff_top + pbrush.Rectangle.Top, maxsize, maxsize);
                 int linearcount = pbrush.SurroundColors.Length;
                 double centeridx = Math.Floor((double)linearcount / 2);
@@ -229,7 +229,7 @@ namespace System.Drawing
                         gradient.AddColorStop((++idx) / linearcount, new Cairo.Color(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f));
                 }
                 Cairo.Matrix matrix = new Cairo.Matrix(1, 0, 0, 1, 0, 0);
-                matrix.Rotate(Math.PI * 45 / 180);//»¡¶È
+                matrix.Rotate(Math.PI * 45 / 180);//å¼§åº¦
                 gradient.Matrix = matrix;
                 using Cairo.Pattern pattern = Cairo.Pattern.Lookup(gradient.Handle, false);
                 this.context.SetSource(pattern);
@@ -292,7 +292,7 @@ namespace System.Drawing
             this.context.NewPath();
             double radius = Math.Min(width / 2, height / 2);
             this.context.Arc(x + radius, y + radius, radius, Math.PI * startAngle / 180, Math.PI * (startAngle + sweepAngle) / 180);
-            //this.context.ArcNegative(x, y, Math.Min(width / 2, height / 2), Math.PI * startAngle / 180, Math.PI * sweepAngle / 180); //Ïà·´Î»ÖÃ
+            //this.context.ArcNegative(x, y, Math.Min(width / 2, height / 2), Math.PI * startAngle / 180, Math.PI * sweepAngle / 180); //ç›¸åä½ç½®
             this.context.Stroke();
             this.context.Restore();
         }
@@ -316,9 +316,9 @@ namespace System.Drawing
             DrawArcCore(pen, x, y, width, height, startAngle, sweepAngle);
         }
 
-        #region ±´Èû¶ûÇúÏß
+        #region è´å¡å°”æ›²çº¿
         /// <summary>
-        /// ÊÕ¼¯±´Èû¶ûÇúÏß×ø±êµãÈ«²¿µãµÄÎ»ÖÃ¼¯ºÏ
+        /// æ”¶é›†è´å¡å°”æ›²çº¿åæ ‡ç‚¹å…¨éƒ¨ç‚¹çš„ä½ç½®é›†åˆ
         /// </summary>
         /// <param name="points"></param>
         /// <returns></returns>
@@ -341,10 +341,10 @@ namespace System.Drawing
             return rpoint;
         }
         /// <summary>
-        /// ¼ÆËã±´Èû¶ûÇúÏßÉÏ×ø±êµãµ¥µãÎ»ÖÃ
+        /// è®¡ç®—è´å¡å°”æ›²çº¿ä¸Šåæ ‡ç‚¹å•ç‚¹ä½ç½®
         /// </summary>
-        /// <param name="points">±´Èû¶ûÌõ¼ş×ø±ê¼¯ºÏ</param>
-        /// <param name="time">Ê±¼äÒò×Ó</param>
+        /// <param name="points">è´å¡å°”æ¡ä»¶åæ ‡é›†åˆ</param>
+        /// <param name="time">æ—¶é—´å› å­</param>
         /// <returns></returns>
         private List<PointF> CalculateBezier(List<PointF> points, float time)
         {
@@ -1499,7 +1499,7 @@ namespace System.Drawing
         private static Cairo.Surface simisurface;
         private static Cairo.Context imagecontext;
         /// <summary>
-        /// Ê¹ÓÃ´Ë·½·¨±ØĞëÒªÖ´ĞĞFlush()·½·¨Êä³öImage
+        /// ä½¿ç”¨æ­¤æ–¹æ³•å¿…é¡»è¦æ‰§è¡ŒFlush()æ–¹æ³•è¾“å‡ºImage
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
@@ -1510,9 +1510,9 @@ namespace System.Drawing
             int _height = image.Height;
 
             if (_width < 1)
-                throw new ArgumentOutOfRangeException("Image.Width²»ÄÜĞ¡ÓÚµÈÓÚ0");
+                throw new ArgumentOutOfRangeException("Image.Widthä¸èƒ½å°äºç­‰äº0");
             if (_height < 1)
-                throw new ArgumentOutOfRangeException("Image.Height²»ÄÜĞ¡ÓÚµÈÓÚ0");
+                throw new ArgumentOutOfRangeException("Image.Heightä¸èƒ½å°äºç­‰äº0");
 
             if (imagesurface == null)
                 imagesurface = new Cairo.ImageSurface(Cairo.Format.Argb32, _width, _height);

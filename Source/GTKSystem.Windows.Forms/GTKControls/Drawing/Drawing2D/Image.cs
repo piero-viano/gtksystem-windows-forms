@@ -1,4 +1,4 @@
-using System.ComponentModel;
+ï»¿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -10,13 +10,13 @@ namespace System.Drawing
     [Serializable]
 	public abstract class Image : Gtk.Widget, IDisposable, ICloneable, ISerializable//,MarshalByRefObject
     {
-        #region Ö»È¡Í¼Ïñbyte[]Êı¾İ 
+        #region åªå–å›¾åƒbyte[]æ•°æ® 
         internal Image(byte[] pixbuf)
 		{
             PixbufData = pixbuf;
         }
         private byte[] _PixbufData;
-        //¡°jpeg¡±, ¡°tiff¡±, ¡°png¡±, ¡°ico¡± or ¡°bmp¡±.
+        //â€œjpegâ€, â€œtiffâ€, â€œpngâ€, â€œicoâ€ or â€œbmpâ€.
         public byte[] PixbufData
         {
             get { if (_PixbufData == null && _Pixbuf != null) { _PixbufData = _Pixbuf.SaveToBuffer("bmp"); } return _PixbufData; }

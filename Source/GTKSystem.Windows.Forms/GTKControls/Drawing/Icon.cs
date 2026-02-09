@@ -1,4 +1,4 @@
-using Gdk;
+锘縰sing Gdk;
 using GTKSystem.Resources;
 using System.ComponentModel;
 using System.IO;
@@ -8,7 +8,7 @@ namespace System.Drawing
 {
 	public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable, ISerializable
 	{
-        #region 只取图像byte[]数据 
+        #region 鍙彇鍥惧儚byte[]鏁版嵁 
         private byte[] _PixbufData;
         public byte[] PixbufData
         {
