@@ -1,4 +1,4 @@
-using Pango;
+﻿using Pango;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -657,11 +657,6 @@ namespace System.Drawing.Drawing2D
 
 		/// <summary>Releases all resources used by this <see cref="T:System.Drawing.Drawing2D.GraphicsPath" />.</summary>
 		public void Dispose()
-		{
-		}
-
-		/// <summary>Allows an object to try to free resources and perform other cleanup operations before it is reclaimed by garbage collection.</summary>
-		~GraphicsPath()
 		{
 		}
 

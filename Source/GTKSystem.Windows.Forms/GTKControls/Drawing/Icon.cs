@@ -199,11 +199,6 @@ namespace System.Drawing
 			return new Icon(filePath);
 		}
 
-		/// <summary>Allows an object to try to free resources and perform other cleanup operations before it is reclaimed by garbage collection.</summary>
-		~Icon()
-		{
-		}
-
 		/// <summary>Creates a GDI+ <see cref="T:System.Drawing.Icon" /> from the specified Windows handle to an icon (<see langword="HICON" />).</summary>
 		/// <param name="handle">A Windows handle to an icon.</param>
 		/// <returns>The <see cref="T:System.Drawing.Icon" /> this method creates.</returns>

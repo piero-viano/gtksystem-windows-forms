@@ -1,4 +1,4 @@
-
+﻿
 using System.Drawing.Drawing2D;
 
 namespace System.Drawing
@@ -136,11 +136,6 @@ namespace System.Drawing
 		/// <exception cref="T:System.ArgumentNullException">
 		///   <paramref name="region" /> is <see langword="null" />.</exception>
 		public void Exclude(Region region)
-		{
-		}
-
-		/// <summary>Allows an object to try to free resources and perform other cleanup operations before it is reclaimed by garbage collection.</summary>
-		~Region()
 		{
 		}
 

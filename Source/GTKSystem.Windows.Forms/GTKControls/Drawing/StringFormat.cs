@@ -1,4 +1,4 @@
-using System.Drawing.Text;
+﻿using System.Drawing.Text;
 
 namespace System.Drawing
 {
@@ -145,11 +145,6 @@ namespace System.Drawing
 
 		/// <summary>Releases all resources used by this <see cref="T:System.Drawing.StringFormat" /> object.</summary>
 		public void Dispose()
-		{
-		}
-
-		/// <summary>Allows an object to try to free resources and perform other cleanup operations before it is reclaimed by garbage collection.</summary>
-		~StringFormat()
 		{
 		}
 
