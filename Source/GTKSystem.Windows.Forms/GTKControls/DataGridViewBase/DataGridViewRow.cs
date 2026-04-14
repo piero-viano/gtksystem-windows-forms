@@ -5,17 +5,35 @@ namespace System.Windows.Forms
 {
     public class DataGridViewRow
     {
-        public int Index { get; internal set; }
+        public int Index
+        {
+            get
+            {
+                if (Parent == null)
+                {
+                    return DataGridView.Rows.IndexOf(this);
+                }
+                else
+                {
+                    return Parent.Children.IndexOf(this);
+                }
+            }
+        }
         public TreeIter TreeIter { get; internal set; }
-        public DataGridView DataGridView { get; set; }
+        public DataGridView DataGridView { get; internal set; }
+        public DataGridViewRow Parent { get; set; }
         private DataGridViewCellCollection _cell;
         private DataGridViewRowCollection _children;
-        public DataGridViewRow()
+        public DataGridViewRow() : this(null)
+        {
+        }
+        public DataGridViewRow(object databounditem)
         {
             _cell = new DataGridViewCellCollection(this);
+            DataBoundItem = databounditem;
         }
         public DataGridViewCellCollection Cells { get { return _cell; } }
-        public DataGridViewRowCollection Children { get => _children ?? new DataGridViewRowCollection(DataGridView, this); }
+        public DataGridViewRowCollection Children { get { if (_children == null) { _children = new DataGridViewRowCollection(DataGridView, this); } return _children; } }
         public object DataBoundItem { get; }
         public DataGridViewCellStyle DefaultCellStyle { get; set; }
 
@@ -29,7 +47,7 @@ namespace System.Windows.Forms
 
         public DataGridViewRowHeaderCell HeaderCell { get; set; }
 
-        public int Height { get; set; } = 28;
+        public int Height { get; set; } = 29;
 
         public  DataGridViewCellStyle InheritedStyle { get; }
 
@@ -41,15 +59,56 @@ namespace System.Windows.Forms
 
         public DataGridViewTriState Resizable { get; set; }
 
-        public bool Selected { get => DataGridView.NativeRowGetSelected(Index); set => DataGridView.NativeRowSetSelected(Index, value); }
-        //public bool Selected { get; set; }
+        public bool Selected { get => DataGridView.NativeRowGetSelected(this.TreeIter); set => DataGridView?.NativeRowSetSelected(this.TreeIter, value); }
 
         public DataGridViewElementStates State { get { return DataGridViewElementStates.None; } }
 
         public ContextMenuStrip ContextMenuStrip { get; set; }
-
-        public bool Visible { get; set; }
-
+        private bool _visible = true;
+        public bool Visible
+        {
+            get => _visible;
+            set
+            {
+                if (value != _visible && DataGridView != null)
+                {
+                    if (DataGridView.UseModelFilter == true && DataGridView.GridView.Model is Gtk.TreeModelFilter filter)
+                    {
+                        //此模式列不支持排序
+                        _visible = value;
+                        filter.Refilter();
+                    }
+                    else
+                    {
+                        //使用此模式列支持排序
+                        if (value == false)
+                        {
+                            Gtk.TreeIter iter = this.TreeIter;
+                            if (Gtk.TreeIter.Zero.Equals(this.TreeIter) == false && this.TreeIter.UserData != null)
+                                DataGridView.Store.Remove(ref iter);
+                            this.TreeIter = Gtk.TreeIter.Zero;
+                        }
+                        else if (Gtk.TreeIter.Zero.Equals(this.TreeIter))
+                        {
+                            int idx = Index + 1;
+                            int count = DataGridView.Rows.Count;
+                            for (int i = idx; i < count; i++)
+                            {
+                                DataGridViewRow row = DataGridView.Rows[i];
+                                if (row.Visible)
+                                {
+                                    TreePath path = DataGridView.Store.GetPath(row.TreeIter);
+                                    if (path != null)
+                                        DataGridView.Rows.InsertRowsStore(path.Indices.Last(), this);
+                                    break;
+                                }
+                            }
+                        }
+                        _visible = value;
+                    }
+                }
+            }
+        }
         public AccessibleObject AccessibilityObject { get; }
 
         public int GetHeight(int index)

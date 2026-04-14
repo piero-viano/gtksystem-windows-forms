@@ -1,6 +1,8 @@
-﻿using GTKSystem.Windows.Forms.GTKControls.ControlBase;
+﻿using Gtk;
+using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.ComponentModel;
 using System.Drawing;
+using System.Reflection;
 using System.Windows.Forms.Layout;
 
 namespace System.Windows.Forms
@@ -19,7 +21,7 @@ namespace System.Windows.Forms
 
         protected const int ScrollStateFullDrag = 16;
 
-        private IScrollableBoxBase scrollbase;
+        protected virtual IScrollableBoxBase scrollbase { get; set; }
         public ScrollableControl():base()
         {
             scrollbase = GtkControl as IScrollableBoxBase;
@@ -32,15 +34,52 @@ namespace System.Windows.Forms
         public Size AutoScrollMinSize { get; set; }
         public Point AutoScrollPosition { get; set; }
         public Size AutoScrollMargin { get; set; }
-        private bool _AutoScroll;
+        private bool _AutoScroll = true;
         public virtual bool AutoScroll
         {
             get => _AutoScroll;
             set
             {
                 _AutoScroll = value;
-                if (AutoSize == false)
-                    if (scrollbase != null) { scrollbase.AutoScroll = value; }
+                if (AutoSize == false && scrollbase != null)
+                {
+                    scrollbase.AutoScroll = value;
+                }
+                PerformLayout(this, "AutoScroll");
+            }
+        }
+       
+        public override void PerformLayout(Control affectedControl, string affectedProperty)
+        {
+            if (affectedProperty== "AutoScroll" && affectedControl.Widget is Gtk.ScrolledWindow sw)
+            {
+                Gtk.Widget widget = sw.Child;
+                if (sw.Child is Gtk.Viewport view)
+                {
+                    if (view.Child is Gtk.Overlay lay)
+                    {
+                        UpdatePerformLayout(lay, _AutoScroll);
+                    }
+                }
+                else if (sw.Child is Gtk.Overlay lay)
+                {
+                    UpdatePerformLayout(lay, _AutoScroll);
+                }
+            }
+            base.PerformLayout(affectedControl, affectedProperty);
+        }
+        internal void UpdatePerformLayout(Gtk.Overlay lay, bool autoscroll)
+        {
+            if (autoscroll == false)
+                lay.SetSizeRequest(-1, -1);
+            else
+            {
+                lay.SetSizeRequest(1, 1);
+                foreach (Gtk.Widget widget in lay.Children)
+                {
+                    lay.WidthRequest = Math.Max(lay.WidthRequest, widget.MarginStart + widget.WidthRequest);
+                    lay.HeightRequest = Math.Max(lay.HeightRequest, widget.MarginTop + widget.HeightRequest);
+                }
             }
         }
         public override bool AutoSize
@@ -69,6 +108,28 @@ namespace System.Windows.Forms
         {
             add { if (scrollbase != null) { scrollbase.Scroll += value; } }
             remove { if (scrollbase != null) { scrollbase.Scroll -= value; } }
+        }
+        public void ScrollControlIntoView(System.Windows.Forms.Control activeControl)
+        {
+            if (activeControl != null && activeControl.Widget != null && scrollbase != null && AutoScroll == true)
+            {
+                if (this.Widget != null)
+                {
+                    activeControl.Widget.Window.GetOrigin(out int sx, out int sy);
+                    this.Widget.Window.GetOrigin(out int px, out int py);
+                    int hvalue = HScroll ? sx - px : -1;
+                    int vvalue = VScroll ? sy - py : -1;
+                    if (this.Widget is Gtk.Window win)
+                    {
+                        vvalue -= 20;
+                        if (win.Titlebar != null)
+                            vvalue -= win.Titlebar.AllocatedHeight;
+                    }
+                    Gtk.ScrolledWindow scrolled = scrollbase.ScrolledWindow;
+                    scrollbase.ScrollView(hvalue + scrolled.Hadjustment.Value, vvalue + scrolled.Vadjustment.Value);
+
+                }
+            }
         }
     }
 }

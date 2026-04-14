@@ -12,11 +12,17 @@ namespace GTKWinFormsApp
             this.Shown += Form4_Shown;
 
             button4.Click += Button4_Click;
+            button10.Click += Button10_Click;
+        }
+
+        private void Button10_Click(object? sender, EventArgs e)
+        {
+      
         }
 
         private void Button4_Click(object sender, EventArgs e)
         {
-
+ 
         }
 
         Point panel1Location = new Point();
@@ -88,16 +94,6 @@ namespace GTKWinFormsApp
         {
             MessageBox.Show("test message test message test messagetest message test message test message test messagetest message test message test message test messagetest message test message test message test messagetest message test message test message test messagetest message", "疑问", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             MessageBox.Show("test message test message \ntest messagetest message", "警告", MessageBoxButtons.RetryCancel, MessageBoxIcon.Warning);
-        }
-
-        private void vScrollBar1_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void hScrollBar1_ValueChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

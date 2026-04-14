@@ -4,14 +4,10 @@
  * 技术支持438865652@qq.com，https://www.gtkapp.com, https://gitee.com/easywebfactory, https://github.com/easywebfactory
  * author:chenhongjin
  */
- 
-using GLib;
+
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data.Common;
 using System.Drawing;
-using static System.Windows.Forms.TableLayoutControlCollection;
 
 namespace System.Windows.Forms
 {
@@ -22,47 +18,73 @@ namespace System.Windows.Forms
     //[ProvideProperty("CellPosition", typeof(Control))]
     //[DefaultProperty("ColumnCount")]
     [DesignerCategory("Component")]
-    public partial class TableLayoutPanel : ContainerControl, IExtenderProvider
+    public partial class TableLayoutPanel : Panel, IExtenderProvider
     {
-        public readonly TableLayoutPanelBase self = new TableLayoutPanelBase();
-        public override object GtkControl => self;
         private TableLayoutControlCollection _controls;
 		private TableLayoutColumnStyleCollection _columnStyles;
 		private TableLayoutRowStyleCollection _rowStyles;
-        public Gtk.Grid grid => self.grid;
-        public TableLayoutPanel():base()
+        public TableLayoutPanelBase layoutEngine = new TableLayoutPanelBase();
+        public TableLayoutPanel():base("TableLayoutPanel")
         {
-            _controls=new TableLayoutControlCollection(this);
+            self.Override.sender = this;
+            layoutEngine.Halign = Gtk.Align.Fill;
+            layoutEngine.Valign = Gtk.Align.Fill;
+            layoutEngine.SizeAllocated += Self_SizeAllocated;
+            layoutEngine.Mapped += Self_Mapped;
+            _controls =new TableLayoutControlCollection(this);
 			_columnStyles = new TableLayoutColumnStyleCollection();
-			_rowStyles = new TableLayoutRowStyleCollection();
+			_rowStyles = new TableLayoutRowStyleCollection();           
+            self.Remove(self.contaner);
+            self.contaner.Destroy();
+            self.Add(layoutEngine);
+        }
+
+        private bool Is_Self_Mapped;
+        private void Self_Mapped(object sender, EventArgs e)
+        {
+            if (!Is_Self_Mapped)
+            {
+                Is_Self_Mapped = true;
+                PerformLayout();
+            }
+        }
+        private int allocationwidth = 0;
+        private int allocationheight = 0;
+        private void Self_SizeAllocated(object o, Gtk.SizeAllocatedArgs args)
+        {
+            if (args.Allocation.Width != allocationwidth || args.Allocation.Height != allocationheight)
+            {
+                PerformLayout();
+                allocationwidth = args.Allocation.Width;
+                allocationheight = args.Allocation.Height;
+            }
         }
 
         public override void PerformLayout()
         {
             SetColumnsStyles();
             SetRowsStyles();
+            self.QueueResize();
         }
+        private TableLayoutPanelCellBorderStyle _CellBorderStyle;
 
-        [Browsable(false)]
-        public override BorderStyle BorderStyle { get => base.BorderStyle; set => base.BorderStyle = value; }
-
-
-
-        [Localizable(true)]
-		public TableLayoutPanelCellBorderStyle CellBorderStyle
+        public TableLayoutPanelCellBorderStyle CellBorderStyle
 		{
-            get;
-            set;
+            get => _CellBorderStyle;
+            set
+            {
+                _CellBorderStyle = value;
+                if (value == TableLayoutPanelCellBorderStyle.None)
+                    self.StyleContext.RemoveClass("TableCellBorder");
+                else
+                    self.StyleContext.AddClass("TableCellBorder");
+            }
         }
-
-		[Browsable(false)]
 		public new TableLayoutControlCollection Controls
 		{
 			get => _controls;
         }
 		private int _ColumnCount;
-		[DefaultValue(0)]
-		[Localizable(true)]
 		public int ColumnCount
 		{
             get => _ColumnCount;
@@ -72,15 +94,15 @@ namespace System.Windows.Forms
                 {
                     for (int c = 0; c < value; c++)
                     {
-                        if (grid.GetChildAt(c, r) == null)
+                        if (layoutEngine.GetChildAt(c, r) == null)
                         {
-                            grid.Attach(new Gtk.Viewport() { Vexpand = true, Hexpand = true, BorderWidth = 0, Valign = Gtk.Align.Fill, Halign = Gtk.Align.Fill }, c, r, 1, 1);
+                            layoutEngine.Attach(new Gtk.Viewport() { Vexpand = true, Hexpand = true, BorderWidth = 0, Valign = Gtk.Align.Fill, Halign = Gtk.Align.Fill }, c, r, 1, 1);
                         }
                     }
                 }
                 for (int c = value; c < _ColumnCount; c++)
                 {
-                    grid.RemoveColumn(value);
+                    layoutEngine.RemoveColumn(value);
                 }
                 _ColumnCount = value;
                 SetColumnsStyles();
@@ -93,8 +115,6 @@ namespace System.Windows.Forms
             set;
         }
         private int _RowCount;
-        [DefaultValue(0)]
-		[Localizable(true)]
 		public int RowCount
 		{
             get => _RowCount;
@@ -104,46 +124,32 @@ namespace System.Windows.Forms
                 {
                     for (int c = 0; c < _ColumnCount; c++)
                     {
-                        if (grid.GetChildAt(c, r) == null)
+                        if (layoutEngine.GetChildAt(c, r) == null)
                         {
-                            grid.Attach(new Gtk.Viewport() { Vexpand = true, Hexpand = true, BorderWidth = 0, Valign = Gtk.Align.Fill, Halign = Gtk.Align.Fill }, c, r, 1, 1);
+                            layoutEngine.Attach(new Gtk.Viewport() { Vexpand = true, Hexpand = true, BorderWidth = 0, Valign = Gtk.Align.Fill, Halign = Gtk.Align.Fill }, c, r, 1, 1);
                         }
                     }
                 }
                 for (int r = value; r < _RowCount; r++)
                 {
-                    grid.RemoveRow(value);
+                    layoutEngine.RemoveRow(value);
                 }
                 _RowCount = value;
                 SetRowsStyles();
             }
         }
-
-		[DisplayName("Rows")]
-		[Browsable(false)]
 		public TableLayoutRowStyleCollection RowStyles
 		{
 			get => _rowStyles;
         }
-
-
-		[DisplayName("Columns")]
-		[Browsable(false)]
 		public TableLayoutColumnStyleCollection ColumnStyles
 		{
 			get => _columnStyles;
         }
-        public override Size Size { 
-            get => base.Size;
-            set {
-                base.Size = value;
-                SetColumnsStyles();
-                SetRowsStyles();
-            }
-        }
         private void SetColumnsStyles()
         {
             Size size = this.Size;
+            int panelWidth = size.Width;
             int cidx = 0;
             foreach (ColumnStyle cs in ColumnStyles)
             {
@@ -152,13 +158,15 @@ namespace System.Windows.Forms
                     if (cs.SizeType == SizeType.Absolute)
                     {
                         for (int r = 0; r < RowCount; r++)
-                            grid.GetChildAt(cidx, r).WidthRequest = Convert.ToInt32(cs.Width);
+                        {
+                            layoutEngine.GetChildAt(cidx, r).WidthRequest = Convert.ToInt32(cs.Width);
+                        }
                     }
                     else if (cs.SizeType == SizeType.Percent)
                     {
                         for (int r = 0; r < RowCount; r++)
                         {
-                            grid.GetChildAt(cidx, r).WidthRequest = Convert.ToInt32(size.Width * cs.Width * 0.01);
+                            layoutEngine.GetChildAt(cidx, r).WidthRequest = Convert.ToInt32(panelWidth * cs.Width * 0.01);
                         }
                     }
                     cidx++;
@@ -168,6 +176,7 @@ namespace System.Windows.Forms
         private void SetRowsStyles()
         {
             Size size = this.Size;
+            int panelHeight = size.Height;
             int ridx = 0;
             foreach (RowStyle rs in RowStyles)
             {
@@ -175,15 +184,13 @@ namespace System.Windows.Forms
                 {
                     if (rs.SizeType == SizeType.Absolute)
                     {
-                        Console.WriteLine(ColumnCount);
-                        Console.WriteLine(Convert.ToInt32(rs.Height));
                         for (int c = 0; c < ColumnCount; c++)
-                            grid.GetChildAt(c, ridx).HeightRequest = Convert.ToInt32(rs.Height);
+                            layoutEngine.GetChildAt(c, ridx).HeightRequest = Convert.ToInt32(rs.Height);
                     }
                     else if (rs.SizeType == SizeType.Percent)
                     {
                         for (int c = 0; c < ColumnCount; c++)
-                            grid.GetChildAt(c, ridx).HeightRequest = Convert.ToInt32(size.Height * rs.Height * 0.01);
+                            layoutEngine.GetChildAt(c, ridx).HeightRequest = Convert.ToInt32(panelHeight * rs.Height * 0.01);
                     }
                     ridx++;
                 }
@@ -193,9 +200,6 @@ namespace System.Windows.Forms
 		{
 			throw null;
 		}
-
-		[DefaultValue(1)]
-		[DisplayName("ColumnSpan")]
 		public int GetColumnSpan(Control control)
 		{
 			return control.Widget.MarginStart;
@@ -206,9 +210,6 @@ namespace System.Windows.Forms
             control.Widget.MarginStart = value;
             control.Widget.MarginEnd = value;
         }
-
-		[DefaultValue(1)]
-		[DisplayName("RowSpan")]
 		public int GetRowSpan(Control control)
 		{
             return control.Widget.MarginTop;
@@ -219,24 +220,19 @@ namespace System.Windows.Forms
             control.Widget.MarginTop = value;
             control.Widget.MarginBottom = value;
         }
-
-		[DefaultValue(-1)]
-		[DisplayName("Row")]
 		public int GetRow(Control control)
 		{
-            return ((Gtk.Grid.GridChild)grid[control.Widget.Parent]).TopAttach;
+            return ((Gtk.Grid.GridChild)layoutEngine[control.Widget.Parent]).TopAttach;
         }
 
 		public void SetRow(Control control, int row)
 		{
-            ((Gtk.Grid.GridChild)grid[control.Widget.Parent]).TopAttach = row;
+            ((Gtk.Grid.GridChild)layoutEngine[control.Widget.Parent]).TopAttach = row;
         }
-
-		[DisplayName("Cell")]
 		public TableLayoutPanelCellPosition GetCellPosition(Control control)
 		{
             TableLayoutPanelCellPosition cellPosition = new TableLayoutPanelCellPosition(-1, -1);
-            if (grid[control.Widget.Parent] is Gtk.Grid.GridChild cell)
+            if (layoutEngine[control.Widget.Parent] is Gtk.Grid.GridChild cell)
             {
                 cellPosition.Column = cell.LeftAttach;
                 cellPosition.Row = cell.TopAttach;
@@ -246,64 +242,56 @@ namespace System.Windows.Forms
 
 		public void SetCellPosition(Control control, TableLayoutPanelCellPosition position)
 		{
-            if (grid[control.Widget.Parent] is Gtk.Grid.GridChild cell)
+            if (layoutEngine[control.Widget.Parent] is Gtk.Grid.GridChild cell)
             {
                 cell.LeftAttach = position.Column;
                 cell.TopAttach = position.Row;
             }
         }
-
-		[DefaultValue(-1)]
-		[DisplayName("Column")]
 		public int GetColumn(Control control)
 		{
-            return ((Gtk.Grid.GridChild)grid[control.Widget.Parent]).LeftAttach;
+            return ((Gtk.Grid.GridChild)layoutEngine[control.Widget.Parent]).LeftAttach;
         }
 
 		public void SetColumn(Control control, int column)
 		{
-            if (grid[control.Widget.Parent] is Gtk.Grid.GridChild child)
+            if (layoutEngine[control.Widget.Parent] is Gtk.Grid.GridChild child)
                 child.LeftAttach = column;
 
         }
 
 		public Control GetControlFromPosition(int column, int row)
 		{
-            return grid.GetChildAt(column, row).Data["Control"] as Control;
+            return layoutEngine.GetChildAt(column, row).Data["Control"] as Control;
 		}
 
         public TableLayoutPanelCellPosition GetPositionFromControl(Control control)
         {
             TableLayoutPanelCellPosition cellPosition = new TableLayoutPanelCellPosition(-1, -1);
-            if (grid[control.Widget.Parent] is Gtk.Grid.GridChild cell)
+            if (layoutEngine[control.Widget.Parent] is Gtk.Grid.GridChild cell)
             {
                 cellPosition.Column = cell.LeftAttach;
                 cellPosition.Row = cell.TopAttach;
             }
             return cellPosition;
         }
-
-        [Browsable(false)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
 		public int[] GetColumnWidths()
 		{
             List<int> list = new List<int>();
             if (RowCount > 0)
             {
                 for (int c = 0; c < ColumnCount; c++)
-                    list.Add(grid.GetChildAt(c, 0).WidthRequest);
+                    list.Add(layoutEngine.GetChildAt(c, 0).WidthRequest);
             }
             return list.ToArray();
 		}
-
-		[Browsable(false)]
 		public int[] GetRowHeights()
 		{
             List<int> list = new List<int>();
             if (ColumnCount > 0)
             {
                 for (int r = 0; r < RowCount; r++)
-                    list.Add(grid.GetChildAt(0, r).WidthRequest);
+                    list.Add(layoutEngine.GetChildAt(0, r).HeightRequest);
             }
             return list.ToArray();
         }

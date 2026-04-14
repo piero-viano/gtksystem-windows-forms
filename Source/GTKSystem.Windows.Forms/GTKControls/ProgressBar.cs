@@ -17,23 +17,17 @@ namespace System.Windows.Forms
         public override object GtkControl => self;
         public ProgressBar():base()
         {
-            self.Realized += Control_Realized;
+            self.Override.sender = this;
+            self.MaxValue = 100;
+            self.MinValue = 0;
         }
-
-        private void Control_Realized(object sender, EventArgs e)
-        {
-            self.MaxValue = Maximum;
-            self.MinValue = Minimum;
-            self.Value = Value;
-        }
-
         public ProgressBarStyle Style { get; set; }
         [DefaultValue(100)]
 		public int MarqueeAnimationSpeed { get; set; } = 100;
         [DefaultValue(100)]
-		public int Maximum { get; set; } = 100;
+		public int Maximum { get => (int)self.MaxValue; set { self.MaxValue = value; } }
         [DefaultValue(0)]
-		public int Minimum { get; set; } = 0;
+		public int Minimum { get => (int)self.MinValue; set { self.MinValue = value; } }
         public new Padding Padding { get; set; }
         [DefaultValue(10)]
         public int Step { get; set; }
@@ -41,6 +35,7 @@ namespace System.Windows.Forms
         public int Value { get => (int)self.Value; set => self.Value = value; }
         public void Increment(int value)
         {
+            self.Value = Math.Max(Minimum, Math.Min(Maximum, self.Value + value));
 
         }
  

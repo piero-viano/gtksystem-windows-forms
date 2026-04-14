@@ -23,7 +23,7 @@ namespace System.Windows.Forms
 
     [ToolboxItemFilter("System.Windows.Forms")]
     [DefaultProperty(nameof(Images))]
-    [TypeConverter(typeof(ImageListConverter))]
+    //[TypeConverter(typeof(ImageListConverter))]
     public sealed partial class ImageList : Component//, IHandle<HIMAGELIST>
     {
         private static readonly Color s_fakeTransparencyColor = Color.FromArgb(0x0d, 0x0b, 0x0c);
@@ -131,8 +131,7 @@ namespace System.Windows.Forms
 
         internal Image GetOriginalImage(string name)
         {
-           // string direc = Path.GetDirectoryName(Application.ExecutablePath);
-            string path1 = $"./Resources";
+            string path1 = "Resources";
             var value = this.ImageStream;
             if (value.ResourceInfo != null && value.ResourceInfo.BaseName != null)
             {

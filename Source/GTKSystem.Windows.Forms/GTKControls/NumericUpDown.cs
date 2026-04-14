@@ -16,11 +16,13 @@ namespace System.Windows.Forms
         public override object GtkControl => self;
         public NumericUpDown() : base()
         {
+            self.Override.sender = this;
             self.ValueChanged += Self_ValueChanged;
         }
 
         private void Self_ValueChanged(object sender, EventArgs e)
         {
+            Console.WriteLine(self.WidgetPath.ToString());
             if (ValueChanged != null && self.IsVisible)
                 ValueChanged(this, e);
         }

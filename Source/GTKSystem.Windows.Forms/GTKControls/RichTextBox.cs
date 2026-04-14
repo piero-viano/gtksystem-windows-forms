@@ -4,11 +4,9 @@
  * 技术支持438865652@qq.com，https://www.gtkapp.com, https://gitee.com/easywebfactory, https://github.com/easywebfactory
  * author:chenhongjin
  */
-using GLib;
 using Gtk;
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.ComponentModel;
-using System.Text;
 
 namespace System.Windows.Forms
 {
@@ -21,9 +19,12 @@ namespace System.Windows.Forms
         {
             self.TextView.Name = this.Name;
             base.SetStyle(self.TextView);
+            self.TextView.FocusVadjustment = self.Vadjustment;
+            self.TextView.FocusHadjustment = self.Hadjustment;
         }
         public RichTextBox():base()
         {
+            self.Override.sender = this;
             self.TextView.Buffer.Changed += Buffer_Changed;
             this.BorderStyle = BorderStyle.Fixed3D;
         }
@@ -37,6 +38,13 @@ namespace System.Windows.Forms
 
         public override string Text { get => self.TextView.Buffer.Text; set => self.TextView.Buffer.Text = value; }
         public virtual bool ReadOnly { get { return self.TextView.CanFocus; } set { self.TextView.CanFocus = value; } }
+        public override bool Focus()
+        {
+            self.TextView.Buffer.GetSelectionBounds(out TextIter start, out TextIter end);
+            self.TextView.ScrollToIter(start, 0, false, 0, 1);
+            self.TextView.IsFocus = true;
+            return self.TextView.IsFocus;
+        }
 
         public override event EventHandler TextChanged;
         public void AppendText(string text)
@@ -68,7 +76,6 @@ namespace System.Windows.Forms
             set { Select(value, SelectionLength); }
         }
         
-        [System.ComponentModel.Browsable(false)]
         public virtual int SelectionLength
         {
             get { self.TextView.Buffer.GetSelectionBounds(out TextIter start, out TextIter end); return end.Offset - start.Offset; }
@@ -83,10 +90,37 @@ namespace System.Windows.Forms
             TextIter enditer = self.TextView.Buffer.GetIterAtOffset(start + length);
             self.TextView.Buffer.SelectRange(startiter, enditer);
         }
+        public string SelectedText
+        {
+            get
+            {
+                if (self.TextView.Buffer.GetSelectionBounds(out TextIter start, out TextIter end))
+                    return self.TextView.Buffer.GetText(start, end, false);
+                else
+                    return string.Empty;
+            }
+            set
+            {
+                if (self.TextView.Buffer.GetSelectionBounds(out TextIter start, out TextIter end))
+                {
+                    //self.TextView.Buffer.Insert(ref start, value);
+                    self.TextView.Buffer.DeleteSelection(false, false);
+                    self.TextView.Buffer.InsertAtCursor(value);
+                }
+            }
+        }
         public void InsertTextAtCursor(string text)
         {
             if (text == null) return;
             self.TextView.Buffer.InsertAtCursor(text);
+        }
+        public void SelectAll()
+        {
+            Select(0, Text.Length);
+        }
+        public void DeselectAll()
+        {
+            SelectionLength = 0;
         }
     }
 }

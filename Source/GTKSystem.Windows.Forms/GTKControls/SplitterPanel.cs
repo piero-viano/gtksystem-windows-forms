@@ -5,8 +5,6 @@
  * author:chenhongjin
  */
 
-using Gtk;
-using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.ComponentModel;
 using System.Drawing;
 
@@ -16,11 +14,10 @@ namespace System.Windows.Forms
     [DesignerCategory("Component")]
     public sealed class SplitterPanel : Panel
     {
-        internal SplitContainer Owner;
         public SplitterPanel(SplitContainer owner) : base()
         {
-            self.Override.AddClass("SplitterPanel");
-            Owner = owner;
+            self.Override.sender = this;
+            self.StyleContext.AddClass("SplitterPanel");
             self.BorderWidth = 0;
             self.ShadowType = Gtk.ShadowType.None;
             self.Margin = 0;
@@ -29,10 +26,11 @@ namespace System.Windows.Forms
             self.Hexpand = false;
             self.Vexpand = false;
         }
-
+        public override AnchorStyles Anchor { get; set; }
         public override DockStyle Dock { get { return DockStyle.Fill; } set { } }
         public override Size Size { get; set; }
         public override int Width { get; set; }
         public override int Height { get; set; }
+        public override bool AutoSize { get => base.AutoSize; set { } }
     }
 }

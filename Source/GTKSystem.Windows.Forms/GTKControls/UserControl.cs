@@ -7,8 +7,6 @@
 using Gtk;
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.ComponentModel;
-using System.Drawing;
-using System.Xml.Linq;
 
 
 namespace System.Windows.Forms
@@ -19,58 +17,41 @@ namespace System.Windows.Forms
     {
         public readonly UserControlBase self = new UserControlBase();
         public override object GtkControl => self;
-        private Gtk.Overlay contaner;
         private ControlCollection _controls;
-
         public UserControl() : base()
         {
-            contaner = new Gtk.Overlay();
-            contaner.MarginStart = 0;
-            contaner.MarginTop = 0;
-            contaner.BorderWidth = 0;
-            contaner.Halign = Align.Fill;
-            contaner.Valign = Align.Fill;
-            contaner.Hexpand = false;
-            contaner.Vexpand = false;
-            contaner.Add(new Gtk.Fixed() { Halign = Align.Fill, Valign = Align.Fill });
-            _controls = new ControlCollection(this, contaner);
-            self.Add(contaner);
-            self.Override.Paint += Override_Paint;
-            self.ParentSet += Self_ParentSet;
+            self.Override.sender = this;
+            _controls = new ControlCollection(this, self.contaner);
+            self.Shown += Self_Shown;
         }
+        private bool Is_Control_Shown = false;
+        private void Self_Shown(object sender, EventArgs e)
+        {
+            if (Is_Control_Shown == false)
+            {
+                Is_Control_Shown = true;
+                OnLoad(EventArgs.Empty);
+                Load?.Invoke(this, e);
+            }
+        }
+
         public override Padding Padding
         {
             get => base.Padding;
             set
             {
                 base.Padding = value;
-                contaner.MarginStart = value.Left;
-                contaner.MarginTop = value.Top;
-                contaner.MarginEnd = value.Right;
-                contaner.MarginBottom = value.Bottom;
+                self.contaner.MarginStart = value.Left;
+                self.contaner.MarginTop = value.Top;
+                self.contaner.MarginEnd = value.Right;
+                self.contaner.MarginBottom = value.Bottom;
             }
         }
-        private void Self_ParentSet(object o, ParentSetArgs args)
-        {
-            OnParentChanged(EventArgs.Empty);
-        }
-
-        private void Override_Paint(object sender, PaintEventArgs e)
-        {
-            OnPaint(e);
-        }
-
         public override event EventHandler Load;
         public System.Drawing.SizeF AutoScaleDimensions { get; set; }
         public System.Windows.Forms.AutoScaleMode AutoScaleMode { get; set; }
         public override ControlCollection Controls => _controls;
 
-        protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
-        {
-        }
-        protected override void OnParentChanged(EventArgs e)
-        {
-        }
         public override void SuspendLayout()
         {
 
@@ -78,10 +59,6 @@ namespace System.Windows.Forms
         public override void ResumeLayout(bool performLayout)
         {
 
-        }
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
         }
     }
 }

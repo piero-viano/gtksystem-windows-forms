@@ -23,14 +23,29 @@ namespace System.Windows.Forms
         private ObjectCollection __itemsData;
         public ComboBox():base()
         {
+            self.Override.sender = this;
             self.Entry.HasFrame = false;
             self.Entry.WidthChars = 0;
 
             __itemsData = new ObjectCollection(this);
             self.Realized += Self_Realized;
             self.Changed += Self_Changed;
+            self.GrabNotify += Self_GrabNotify;
         }
 
+        public event EventHandler DropDown;
+        public event EventHandler DropDownClosed;
+        private void Self_GrabNotify(object o, GrabNotifyArgs args)
+        {
+            if (args.WasGrabbed)
+            {
+                DropDownClosed?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+                DropDown?.Invoke(this, EventArgs.Empty);
+            }
+        }
         private void Self_Changed(object sender, EventArgs e)
         {
             if (self.IsVisible)
@@ -41,70 +56,41 @@ namespace System.Windows.Forms
             }
         }
 
+        private bool Is_Self_Realized;
         private void Self_Realized(object sender, EventArgs e)
         {
-            OnSetDataSource();
-            var ws = ((Gtk.Box)self.Children[0].Parent).Children[1] as Gtk.ToggleButton;
-            ws.Toggled += Ws_Toggled;
-            if (DropDownStyle == ComboBoxStyle.DropDownList)
+            if (!Is_Self_Realized)
             {
-                self.Entry.IsEditable = false;
-                self.Entry.CanFocus = false;
-                self.Entry.NoShowAll = true;
-                self.Entry.WidthRequest = 1;
-                ws.WidthRequest = self.WidthRequest;
-                ws.Label = self.Entry.Text;
-                ws.Image = Gtk.Image.NewFromIconName("pan-down", Gtk.IconSize.Button);
-                ws.ImagePosition = Gtk.PositionType.Right;
-                ws.AlwaysShowImage = true;
-                ws.Valign = Align.Center;
-                ws.Yalign = 0.5f;
-                ws.Xalign = 0.95f;
-                ws.Hexpand = true;
-                ws.Image.Halign = Gtk.Align.End;
-                ws.Image.Valign = Gtk.Align.Center;
-                ws.Drawn += Ws_Drawn;
+                Is_Self_Realized = true;
+                OnSetDataSource();
+                if (_DropDownStyle == ComboBoxStyle.DropDownList)
+                {
+                    Gtk.Box box = (Gtk.Box)self.Entry.Parent;
+                    var ws = box.Children[1] as Gtk.ToggleButton;
+                    self.Entry.IsEditable = false;
+                    self.Entry.CanFocus = false;
+                    self.Entry.NoShowAll = true;
+                    self.Entry.WidthRequest = 1;
+                    ws.WidthRequest = Math.Max(self.WidthRequest, self.AllocatedWidth);
+                    ws.DrawIndicator = true;
+                    ws.Drawn += Ws_Drawn;
+                }
             }
         }
-        public event EventHandler DropDown;
-        private void Ws_Toggled(object sender, EventArgs e)
-        {
-            if (DropDown != null)
-            {
-                DropDown(this, e);
-            }
-        }
-        private void Ws_Drawn(object o, Gtk.DrawnArgs args)
+        private void Ws_Drawn(object o, DrawnArgs args)
         {
             self.Entry.Visible = false;
-            Gtk.ToggleButton ws = (Gtk.ToggleButton)o;
-            ws.WidthRequest = -1;
-            Pango.Context pangocontext = ws.PangoContext;
-            string family = pangocontext.FontDescription.Family;
-            args.Cr.SelectFontFace(family, Cairo.FontSlant.Normal, Cairo.FontWeight.Normal);
-            if (this.ForeColor.Name == "0")
-            {
-                Gdk.RGBA color = ws.StyleContext.GetColor(StateFlags.Normal);
-                args.Cr.SetSourceRGBA(color.Red, color.Green, color.Blue, color.Alpha);
-            }
-            else
-            {
-                args.Cr.SetSourceRGBA(this.ForeColor.R / 255, this.ForeColor.G / 255, this.ForeColor.B / 255, this.ForeColor.A / 255);
-            }
-
-            double fontsize = pangocontext.FontDescription.Size / Pango.Scale.PangoScale * 1.5;
+            var ws = o as Gtk.ToggleButton;
+            ws.WidthRequest = Math.Max(self.WidthRequest, self.AllocatedWidth);
+            string text = self.ActiveText;
+            Pango.Layout layout = ws.CreatePangoLayout(text);
             args.Cr.Save();
-            args.Cr.Translate(10, (ws.AllocatedHeight - fontsize) / 2 + fontsize - 2);
-            args.Cr.SetFontSize(fontsize);
-            Cairo.TextExtents ext = args.Cr.TextExtents(self.Entry.Text);
-            string text = self.Entry.Text;
-            while (text.Length > 1 && args.Cr.TextExtents(text).Width > ws.AllocatedWidth - 40)
-                text = text.Substring(0, text.Length - 1);
-
-            args.Cr.ShowText(text);
+            args.Cr.Translate(10, 5);
+            args.Cr.Rectangle(0, 0, ws.AllocatedWidth - 35, ws.AllocatedHeight - 5);
+            args.Cr.Clip();
+            Pango.CairoHelper.ShowLayout(args.Cr, layout);
             args.Cr.Restore();
         }
-
         private ComboBoxStyle _DropDownStyle;
         public ComboBoxStyle DropDownStyle { 
             get=> _DropDownStyle; 
@@ -122,7 +108,6 @@ namespace System.Windows.Forms
                 }
             }
         }
-
 
         public override string Text { get => self.Entry.Text; set { self.Entry.Text = value; } }
         public object SelectedItem { 
@@ -161,7 +146,6 @@ namespace System.Windows.Forms
             }
             else
             {
-                 
                 self.Append(value, text);
             }
         }

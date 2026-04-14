@@ -4,17 +4,26 @@ namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
 {
     public sealed class PanelBase: ScrollableBoxBase
     {
+        public Gtk.Overlay contaner = new Gtk.Overlay();
         public PanelBase() : base()
         {
-            this.Override.AddClass("Panel");
+            this.StyleContext.AddClass("Panel");
             this.ShadowType = Gtk.ShadowType.None;
             this.BorderWidth = 0;
+            contaner.Margin = 0;
+            contaner.Halign = Align.Fill;
+            contaner.Valign = Align.Fill;
+            contaner.Hexpand = false;
+            contaner.Vexpand = false;
+            Gtk.DrawingArea background = new Gtk.DrawingArea();
+            background.Events = Gdk.EventMask.EnterNotifyMask;
+            background.Drawn += Background_Drawn;
+            contaner.Add(background);
+            this.Add(contaner);
         }
-        protected override bool OnDrawn(Cairo.Context cr)
+        private void Background_Drawn(object o, DrawnArgs args)
         {
-            Gdk.Rectangle rec = new Gdk.Rectangle(0, 0, this.AllocatedWidth, this.AllocatedHeight);
-            Override.OnDrawnBackground(cr, rec);
-            return base.OnDrawn(cr);
+            Override.OnPaint(args.Cr);
         }
     }
 }

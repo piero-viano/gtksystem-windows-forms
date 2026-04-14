@@ -8,62 +8,45 @@ namespace System.Windows.Forms
 {
     public abstract class DataGridViewCell
     {
-        internal DataGridViewRow OwningRowInternal { get; set; }
-        public DataGridView DataGridView { get; set; }
         protected DataGridViewCell() { }
         public object Value { get; set; }
-
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string ToolTipText { get; set; }
-        [Bindable(true)]
-        [DefaultValue(null)]
-        [Localizable(false)]
-        [TypeConverter(typeof(StringConverter))]
         public object Tag { get; set; }
-        [Browsable(true)]
         public DataGridViewCellStyle Style { get; set; }
 
         public Size Size { get; }
         private bool _Selected;
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public virtual bool Selected { get => _Selected; set { _Selected = value; DataGridView?.GridView.QueueDraw(); } }
-        public int RowIndex { get; internal set; }
+        public int RowIndex { get => OwningRow == null ? -1 : OwningRow.Index; }
 
         public virtual bool Resizable { get; }
 
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public virtual bool ReadOnly { get; set; }
 
         public Size PreferredSize { get; }
+        public DataGridView DataGridView { get => OwningRow.DataGridView; }
+        public DataGridViewRow OwningRow { get; internal set; }
 
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public DataGridViewRow OwningRow { get; }
-
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public DataGridViewColumn OwningColumn { get; }
+        public DataGridViewColumn OwningColumn { get=> OwningRow.DataGridView.Columns[ColumnIndex]; }
 
         public bool IsInEditMode { get; }
-        internal DataGridViewCellStyle RowStyle { get; set; }
-        public DataGridViewCellStyle InheritedStyle { get => RowStyle; }
+        internal DataGridViewCellStyle RowStyle { get => OwningRow.DefaultCellStyle; }
+        public DataGridViewCellStyle InheritedStyle { get; }
 
         public AccessibleObject AccessibilityObject { get; }
         public int ColumnIndex { get; internal set; }
 
         public Rectangle ContentBounds { get; }
-        [DefaultValue(null)]
         public virtual ContextMenuStrip ContextMenuStrip { get; set; }
 
         public virtual object DefaultNewRowValue { get; }
 
         public virtual bool Displayed { get; }
 
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public object EditedFormattedValue { get; }
 
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public virtual Type EditType { get; }
 
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public Rectangle ErrorIconBounds { get; }
 
         public string ErrorText { get; set; }
@@ -81,13 +64,14 @@ namespace System.Windows.Forms
         public DataGridViewElementStates InheritedState { get; }
         private Type _valueType;
         public virtual Type ValueType { get { return _valueType == null ? Value?.GetType() : _valueType; } set { _valueType = value; } }
-        
+        public void OnCellPainting(DataGridViewCellPaintingEventArgs args)
+        {
+            OwningRow?.DataGridView?.OnCellPainting(this, args);
+        }
     }
     public class DataGridViewTextBoxCell : DataGridViewCell
     {
-        //public DataGridViewTextBoxCell(DataGridViewRow dataGridViewRow) {
-         
-        //}
+
     }
     public class DataGridViewCheckBoxCell : DataGridViewCell
     {

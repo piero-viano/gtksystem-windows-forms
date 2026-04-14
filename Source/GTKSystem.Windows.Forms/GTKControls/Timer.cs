@@ -14,54 +14,91 @@ namespace System.Windows.Forms
     [ToolboxItemFilter("System.Windows.Forms")]
     public class Timer : Component
     {
-        readonly System.Timers.Timer TimersTimer = new Timers.Timer();
-        public Timer()
+        private protected EventHandler? _onTimer;
+        private uint _interval = 100;
+        private bool _enabled;
+        private uint _timerId = 0;
+        private readonly object _syncObj = new();
+        public Timer() : base()
         {
-            TimersTimer.Elapsed += TimersTimer_Elapsed;
         }
 
         public Timer(IContainer container) : this()
         {
+            container.Add(this);
         }
-        private void TimersTimer_Elapsed(object sender, Timers.ElapsedEventArgs e)
+        public event EventHandler Tick
         {
-            if (Tick != null)
-                Gtk.Application.Invoke(Tick);
+            add => _onTimer += value;
+            remove => _onTimer -= value;
         }
-
-        [Bindable(true)]
-        [DefaultValue(null)]
-        [Localizable(false)]
-        [TypeConverter(typeof(StringConverter))]
+        protected virtual void OnTick(EventArgs e)
+        {
+            if (_enabled) 
+                _onTimer?.Invoke(this, EventArgs.Empty);
+        }
         public object Tag { get; set; }
 
         [DefaultValue(false)]
-        public virtual bool Enabled { get => TimersTimer.Enabled; set => TimersTimer.Enabled = value; }
+        public virtual bool Enabled { get => _enabled;
+            set
+            {
+                lock (_syncObj)
+                {
+                    if (_enabled != value)
+                    {
+                        _enabled = value;
+                        if (value)
+                        {
+                            _timerId = GLib.Timeout.Add(_interval, () =>
+                            {
+                                OnTick(EventArgs.Empty);
+                                return true;
+                            });
+                        }
+                        else
+                        {
+                            if (_timerId != 0)
+                                GLib.Timeout.Remove(_timerId);
+                            _timerId = 0;
+                        }
+                    }
+                }
+            }
+
+        }
 
         [DefaultValue(100)]
-        public int Interval { get => (int)TimersTimer.Interval; set => TimersTimer.Interval = value; }
+        public int Interval { get => (int)_interval; 
+            set {
+                if (_interval != value)
+                {
+                    _interval = (uint)value;
+                    if (_enabled)
+                    {
+                        Enabled = false;
+                        Enabled = true;
+                    }
+                }
+            }
+        }
 
-        public event EventHandler Tick;
         public void Start()
         {
-            TimersTimer.Start();
+            Enabled = true;
         }
 
         public void Stop()
         {
-            TimersTimer.Stop();
+            Enabled = false;
         }
 
-        public override string ToString() { return "System.Windows.Forms.Timer"; }
+        public override string ToString() => $"{base.ToString()}, Interval: {Interval}";
 
         protected override void Dispose(bool disposing)
         {
-            TimersTimer.Dispose();
-            base.Dispose();
-        }
-        protected new void Dispose()
-        {
-            Dispose(true);
+            Enabled = false;
+            base.Dispose(disposing);
         }
     }
 }

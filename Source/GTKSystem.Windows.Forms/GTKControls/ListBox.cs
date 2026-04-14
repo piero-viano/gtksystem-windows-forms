@@ -22,7 +22,6 @@ namespace System.Windows.Forms
     {
         public readonly ListBoxBase self = new ListBoxBase();
         public override object GtkControl => self;
-        public override IControlGtk ISelf { get => self; }
         protected override void SetStyle(Widget widget)
         {
             self.ListBox.Name = this.Name;
@@ -33,6 +32,7 @@ namespace System.Windows.Forms
 
         public ListBox():base()
 		{
+            self.Override.sender = this;
             self.ListBox.Halign = Gtk.Align.Fill;
             self.ListBox.Valign = Gtk.Align.Fill;
             self.ListBox.Hexpand = true;
@@ -42,6 +42,7 @@ namespace System.Windows.Forms
             self.ListBox.Realized += Self_Realized;
             self.ListBox.SelectedRowsChanged += ListBox_SelectedRowsChanged;
             this.BorderStyle = BorderStyle.Fixed3D;
+            self.ListBox.FocusVadjustment = self.Vadjustment;
         }
         private void ListBox_SelectedRowsChanged(object sender, EventArgs e)
         {
@@ -52,12 +53,16 @@ namespace System.Windows.Forms
                 ((EventHandler)Events["SelectedItemChanged"])?.Invoke(this, e);
             }
         }
-
+        private bool Is_Self_Realized;
         private void Self_Realized(object sender, EventArgs e)
         {
-            OnSetDataSource();
-            foreach (Binding binding in DataBindings)
-                self.ListBox.AddNotification(binding.PropertyName, propertyNotity);
+            if (!Is_Self_Realized)
+            {
+                Is_Self_Realized = true;
+                OnSetDataSource();
+                foreach (Binding binding in DataBindings)
+                    self.ListBox.AddNotification(binding.PropertyName, propertyNotity);
+            }
         }
         private void propertyNotity(object o, NotifyArgs args)
         {
@@ -172,23 +177,17 @@ namespace System.Windows.Forms
         {
             Gtk.ListBoxRow row = new Gtk.ListBoxRow();
             row.HeightRequest = ItemHeight > 0 ? ItemHeight : DefaultItemHeight;
-            row.Add(new Gtk.Label(item.ToString()) { Valign = Align.Center, Halign = Align.Start, Expand = true });
+            row.Visible = true;
+            row.Add(new Gtk.Label(item.ToString()) { Valign = Align.Center, Halign = Align.Start, Expand = true, Visible = !IsUpdateing });
             self.ListBox.Insert(row, index);
-            if (self.ListBox.IsVisible && !IsUpdateing)
-            {
-                self.ListBox.ShowAll();
-            }
         }
         protected void NativeAdd(object item)
         {
             Gtk.ListBoxRow row = new Gtk.ListBoxRow();
             row.HeightRequest = ItemHeight > 0 ? ItemHeight : DefaultItemHeight;
-            row.Add(new Gtk.Label(item.ToString()) { Valign = Align.Center, Halign = Align.Start, Expand = true });
+            row.Visible = true;
+            row.Add(new Gtk.Label(item.ToString()) { Valign = Align.Center, Halign = Align.Start, Expand = true, Visible = !IsUpdateing });
             self.ListBox.Add(row);
-            if (self.ListBox.IsVisible && !IsUpdateing)
-            {
-                self.ListBox.ShowAll();
-            }
         }
         protected void NativeClear()
         {
@@ -291,7 +290,10 @@ namespace System.Windows.Forms
         [Browsable(false)]
 		public int PreferredHeight
         {
-            get; 
+            get { 
+                self.ListBox.GetPreferredHeight(out int mini_height, out int natural_height);
+                return mini_height;
+            }
         }
 
         [DefaultValue(false)]
@@ -393,25 +395,25 @@ namespace System.Windows.Forms
         private int _topIndex;
 		public int TopIndex
         {
-            get=> _topIndex; 
-            set {
+            get=> _topIndex;
+            set
+            {
                 _topIndex = value;
-                GLib.Timeout.Add(100, new TimeoutHandler(() => {
-                    int rowheight = ItemHeight;
-                    if (rowheight < 14)
-                    {
-                        if (self.ListBox.Children.Length > 0)
-                            rowheight = self.ListBox.Children[0].AllocatedHeight;
-                        else
-                            rowheight = 18;
-                    }
-                    var adjustment = self.Vadjustment;
-                    adjustment.Value = value * rowheight - Height + 5;
-                    return false;
-                }));
+                int y_offset = 0;
+                int maxi = self.ListBox.Children.Length;
+                for (int i = 0; i < _topIndex && i < maxi; i++)
+                {
+                    self.ListBox.Children[i].GetPreferredHeight(out int mini_height, out int natural_height);
+                    y_offset += natural_height;
+                }
+                self.ScrollView(-1, y_offset);
             }
         }
-
+        public override bool Focus()
+        {
+            self.ListBox.IsFocus = true;
+            return self.ListBox.IsFocus;
+        }
         [DefaultValue(true)]
 		public bool UseTabStops
         {
@@ -464,14 +466,21 @@ namespace System.Windows.Forms
 		}
 
 		public int GetItemHeight(int index)
-		{
-			throw null;
-		}
+        {
+            if (self.ListBox.Children.Length > index)
+            {
+                self.ListBox.Children[index].GetPreferredHeight(out int min_height, out int nat_height);
+                return nat_height;
+            }
+            else
+                return 0;
+        }
 
-		public Drawing.Rectangle GetItemRectangle(int index)
+        public Drawing.Rectangle GetItemRectangle(int index)
 		{
-			throw null;
-		}
+            self.ListBox.Children[index].GetAllocatedSize(out Gdk.Rectangle allocation, out int size);
+            return new Drawing.Rectangle(allocation.X, allocation.Y, allocation.Width, allocation.Height);
+        }
 		public bool GetSelected(int index)
 		{
             return self.ListBox.GetRowAtIndex(index).IsSelected;
@@ -484,7 +493,7 @@ namespace System.Windows.Forms
 
 		public int IndexFromPoint(int x, int y)
 		{
-			throw null;
+            return self.ListBox.GetRowAtY(y).Index;
 		}
 
 		public override void Refresh()
