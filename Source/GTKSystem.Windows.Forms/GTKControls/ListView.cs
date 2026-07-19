@@ -5,13 +5,12 @@
  * author:chenhongjin
  */
 
-using GLib;
 using Gtk;
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using Pango;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 namespace System.Windows.Forms
@@ -27,38 +26,38 @@ namespace System.Windows.Forms
         private ColumnHeaderCollection _columns;
         internal Gtk.ScrolledWindow scrolledWindow = new Gtk.ScrolledWindow();
         internal Gtk.Box flowBoxContainer = new Gtk.Box(Gtk.Orientation.Vertical, 0);
-        internal Gtk.Box header = new Gtk.Box(Gtk.Orientation.Horizontal, 0);
-        internal Gtk.Layout headerView;
+        internal Gtk.ButtonBox header = new Gtk.ButtonBox(Gtk.Orientation.Horizontal);
+        internal Gtk.ScrolledWindow headerView = new Gtk.ScrolledWindow();
         private int __headerheight = 30;
         public ListView() : base()
         {
+            self.Override.sender = this;
             _items = new ListViewItemCollection(this);
             _groups = new ListViewGroupCollection(this);
             _columns = new ColumnHeaderCollection(this);
             self.Realized += Control_Realized;
 
-            header.StyleContext.AddClass("ListViewHeader");
-            header.Spacing = 0;
-            header.BorderWidth = 0;
-            header.Halign = Gtk.Align.Fill;
-            header.Valign = Gtk.Align.Fill;
-            header.HeightRequest = 1;
-            // header.WidthRequest = 500;
-            header.Homogeneous = false;
             flowBoxContainer.Halign = Gtk.Align.Fill;
             flowBoxContainer.Valign = Gtk.Align.Start;
             scrolledWindow.Halign = Gtk.Align.Fill;
             scrolledWindow.Valign = Gtk.Align.Fill;
             scrolledWindow.Add(flowBoxContainer);
-            scrolledWindow.OverlayScrolling = false;
             scrolledWindow.Hadjustment.ValueChanged += Hadjustment_ValueChanged;
-            headerView = new Gtk.Layout(null, null);
+
+            header.LayoutStyle = ButtonBoxStyle.Expand;
+            header.Homogeneous = false;
+            header.Spacing = 0;
+            header.BorderWidth = 0;
+            header.Halign = Gtk.Align.Start;
+            header.Valign = Gtk.Align.Fill;
+
             headerView.Halign = Gtk.Align.Fill;
             headerView.Valign = Gtk.Align.Start;
-            headerView.Hexpand = true;
-            headerView.Vexpand = false;
-            headerView.HeightRequest = 1;// __headerheight;
-            headerView.Width = 100000;
+            headerView.NoShowAll = true;
+            headerView.HeightRequest = __headerheight;
+            headerView.HscrollbarPolicy=PolicyType.External;
+            headerView.VscrollbarPolicy = PolicyType.Never;
+            headerView.StyleContext.AddClass("ListViewHeader");
             headerView.Add(header);
             self.box.PackStart(headerView, false, true, 0);
             self.box.PackStart(scrolledWindow, true, true, 0);
@@ -69,32 +68,37 @@ namespace System.Windows.Forms
             headerView.Hadjustment.Value = scrolledWindow.Hadjustment.Value;
         }
 
-        private bool ControlRealized = false;
+        private bool Is_Control_Realized = false;
         private void Control_Realized(object sender, EventArgs e)
         {
-            if (this.View == View.Details)
+            if (!Is_Control_Realized)
             {
-                header.NoShowAll = false;
-                header.Visible = true;
-                header.ShowAll();
-                headerView.HeightRequest = __headerheight;
-            }
-            foreach (ColumnHeader header in this.Columns)
-            {
-                NativeHeaderAdd(header);
-            }
-            foreach (ListViewGroup g in Groups)
-            {
-                NativeGroupAdd(g, -1);
-            }
-            foreach (ListViewItem item in Items)
-            {
-                NativeAdd(item, -1);
-            }
+                Is_Control_Realized = true;
+                if (this.View == View.Details && HeaderStyle != ColumnHeaderStyle.None)
+                {
+                    headerView.NoShowAll = false;
+                    headerView.ShowAll();
+                }
+                foreach (ColumnHeader cheader in this.Columns)
+                {
+                    NativeHeaderAdd(cheader);
+                }
+                foreach (ListViewGroup g in Groups)
+                {
+                    NativeGroupAdd(g, -1);
+                }
+                foreach (ListViewItem item in Items)
+                {
+                    NativeAdd(item, -1);
+                }
 
-            MultiSelect = MultiSelect == true;
-            self.ShowAll();
+                MultiSelect = _MultiSelect == true;
+                self.ShowAll();
+            }
         }
+        public int VirtualListSize { get; set; }
+        public bool VirtualModel { get; set; } = true;
+        public bool AutoArrange { get; set; } = true;
         public bool Sorted { get; set; }
         public System.Windows.Forms.SortOrder Sorting { get; set; }
         public System.Windows.Forms.ListViewAlignment Alignment { get; set; }
@@ -150,12 +154,16 @@ namespace System.Windows.Forms
             {
                 if (_fontSize < 5)
                 {
-                    if (Font?.Size != null && Font.Size > 5)
+                    if (Font != null && Font.Size > 5)
                     {
                         if (Font.Unit == GraphicsUnit.Point)
                             _fontSize = (int)Font.Size * 96 / 72;
                         else
                             _fontSize = (int)Font.Size;
+                    }
+                    else
+                    {
+                        _fontSize = 12;
                     }
                 }
                 return _fontSize;
@@ -209,85 +217,80 @@ namespace System.Windows.Forms
         {
             if (self.IsRealized)
             {
-                LabelBase label = new LabelBase(col.Text) { Xalign = 0, Xpad = 5, WidthRequest = col.Width, MaxWidthChars = 0, Halign = Gtk.Align.Start, Valign = Gtk.Align.End, Ellipsize = Pango.EllipsizeMode.End, Wrap = false, LineWrap = false };
+                Gtk.Label label = new Gtk.Label(col.Text) { Xalign = 0, Xpad = 5, MaxWidthChars = 0, Halign = Gtk.Align.Fill, Valign = Gtk.Align.End, Ellipsize = Pango.EllipsizeMode.End, Wrap = false, LineWrap = false };
                 label.TooltipText = col.Text;
-                label.Markup = col.Text;
-                label.Data.Add("ColumnIndex", col.Index);
-                label.Override.DrawnBackground += Override_DrawnBackground;
-                var columbt = new Gtk.Button(label) { MarginStart = 0, WidthRequest = col.Width, HeightRequest = __headerheight, Halign = Gtk.Align.Start, Valign = Gtk.Align.Fill };
-                columbt.Name = col.Name;
+                label.Name = $"column_t_{col.Index}";
+                label.Drawn += Label_Drawn;
+                var columbt = new Gtk.Button(label) { MarginStart = 0, WidthRequest = col.Width, Halign = Gtk.Align.Fill, Valign = Gtk.Align.Fill };
+                columbt.Name = $"column_b_{col.Index}";
                 columbt.ActionTargetValue = new GLib.Variant(col.Index);
-                columbt.Data.Add("ColumnIndex", col.Index);
-                columbt.Clicked += Columbt_Clicked;
-                header.PackStart(columbt, false, false, 0);
-
+                columbt.WidgetEvent += Columbt_WidgetEvent;
+                header.PackStart(columbt, false, true, 0);
                 header.ReorderChild(columbt, col.Index);
-
-                if (this.View == View.Details)
-                {
-                    headerView.HeightRequest = __headerheight;
-                    headerView.ShowAll();
-                }
-                else
-                {
-                    headerView.HeightRequest = 1;
-                }
             }
         }
-        private int SortingColumnIndex = -1;
-        private void Columbt_Clicked(object sender, EventArgs e)
+        private double sizex = 0;
+        private double startx = 0;
+        private void Columbt_WidgetEvent(object o, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] WidgetEventArgs args)
         {
-            //Console.WriteLine(((Gtk.Widget)sender).AllocatedWidth);
-            Gtk.Button btn = (Gtk.Button)sender;
-
-            if (this.HeaderStyle == ColumnHeaderStyle.Clickable)
+            if(args.Event is Gdk.EventMotion motion)
             {
-                int actioncolumn = (int)btn.ActionTargetValue;
-                if (this.Sorted == true)
+                if (motion.State.HasFlag(Gdk.ModifierType.Button1Mask))
                 {
-                    if (SortingColumnIndex == actioncolumn)
+                    Gtk.Button title = (Gtk.Button)o;
+                    int actioncolumn = (int)title.ActionTargetValue;
+                    title.WidthRequest = (int)(Math.Max(30, sizex + motion.X));
+                    Columns[actioncolumn].Width = title.WidthRequest;
+                    foreach (Gtk.Box vbox in flowBoxContainer.Children)
                     {
-                        if (Sorting == SortOrder.Ascending)
-                            Sorting = SortOrder.Descending;
-                        else if (Sorting == SortOrder.Descending)
-                            Sorting = SortOrder.None;
-                        else
-                            Sorting = SortOrder.Ascending;
+                        foreach (var flow in vbox.Children)
+                        {
+                            if (flow is Gtk.FlowBox _flow)
+                            {
+                                int count = _flow.Children.Length;
+                                for (int i = 0; i < count; i++)
+                                {
+                                    FlowBoxChild child = _flow.GetChildAtIndex(i);
+                                    Gtk.Box box = (Gtk.Box)child.Child;
+                                    ((Gtk.Viewport)box.Children[actioncolumn]).Child.WidthRequest = title.WidthRequest;
+                                }
+                            }
+                        }
                     }
-                    else
-                    {
-                        Sorting = SortOrder.Ascending;
-                    }
-                    this.Sort();
-
-                    if (ColumnReordered != null)
-                        ColumnReordered(this, new ColumnReorderedEventArgs(SortingColumnIndex, actioncolumn, Columns[actioncolumn]));
-
-                    SortingColumnIndex = actioncolumn;
                 }
-                if (ColumnClick != null)
-                    ColumnClick(this, new ColumnClickEventArgs((int)btn.ActionTargetValue));
+            }
+            else if (args.Event.Type == Gdk.EventType.ButtonPress && args.Event is Gdk.EventButton press)
+            {
+                Gtk.Button title = (Gtk.Button)o;
+                sizex = title.WidthRequest - press.X;
+                startx = press.X;
+            }
+            else if (args.Event.Type == Gdk.EventType.ButtonRelease && args.Event is Gdk.EventButton releas)
+            {
+                if (startx == releas.X)
+                    ColomnSort(o);
             }
         }
-        private void Override_DrawnBackground(object o, DrawnArgs args)
+
+        private void Label_Drawn(object o, DrawnArgs args)
         {
             Cairo.Rectangle rec = args.Cr.ClipExtents();
-            if (rec.Width > 10 && SortingColumnIndex > -1)
+            if (rec.Width > 10 && SortColumn != null)
             {
-                LabelBase ws = (LabelBase)o;
-                if (ws.Data["ColumnIndex"].ToString() == SortingColumnIndex.ToString())
+                Gtk.Label ws = (Gtk.Label)o;
+                if (ws.Name == $"column_t_{SortColumn.Index}")
                 {
                     if (Sorting != SortOrder.None)
                     {
                         Cairo.Context ctx = args.Cr;
                         ctx.Save();
                         ctx.ResetClip();
-                        ctx.Rectangle(rec.X, rec.Y - 4, rec.Width, rec.Height + 4);
+                        ctx.Rectangle(rec.X, rec.Y - 4, rec.Width, rec.Height);
                         ctx.Clip();
-                        ctx.Translate((int)rec.Width / 2 - 16, rec.Y - 5);
+                        ctx.Translate((int)rec.Width / 2 - 6, rec.Y - 5);
                         ctx.Rotate(0.5 * Math.PI);
                         Gdk.RGBA color = ws.StyleContext.GetColor(StateFlags.Normal);
-                        ctx.SetSourceRGBA(color.Red, color.Green, color.Blue, color.Alpha);
+                        ctx.SetSourceRGB(color.Red, color.Green, color.Blue);
                         //Serif,Impact,Sylfaen,Arial Black,Cambria,Candara,Arial
                         ctx.SelectFontFace("Serif", Cairo.FontSlant.Normal, Cairo.FontWeight.Bold);
                         ctx.SetFontSize(13);
@@ -301,7 +304,42 @@ namespace System.Windows.Forms
                 }
             }
         }
-        
+
+        private void ColomnSort(object sender)
+        {
+            if (this.HeaderStyle == ColumnHeaderStyle.Clickable)
+            {
+                Gtk.Button btn = (Gtk.Button)sender;
+                int actioncolumn = (int)btn.ActionTargetValue;
+                if (SelectedColumnIndex != actioncolumn)
+                    Sorting = SortOrder.None;
+                SelectedColumnIndex = actioncolumn;
+                SortColumn = this.Columns[actioncolumn];
+                if (Sorting == SortOrder.Ascending)
+                    Sorting = SortOrder.Descending;
+                else if (Sorting == SortOrder.Descending)
+                    Sorting = SortOrder.None;
+                else
+                    Sorting = SortOrder.Ascending;
+
+                this.Sort();
+
+                if (ColumnClick != null)
+                    ColumnClick(this, new ColumnClickEventArgs((int)btn.ActionTargetValue));
+            }
+        }
+        private int SelectedColumnIndex = -1;
+        public ColumnHeader SortColumn { set; get; }
+        public void Sort()
+        {
+            if (SortColumn != null)
+            {
+                foreach (var group in GetAllGroups())
+                {
+                    group.FlowBox.InvalidateSort();
+                }
+            }
+        }
         internal void NativeUpdateText(ListViewItem item, string text)
         {
             if (item._flowBoxChild != null && item._flowBoxChild.Parent is Gtk.FlowBox flowBox)
@@ -310,7 +348,7 @@ namespace System.Windows.Forms
                 if (this.View == View.Details)
                 {
                     Gtk.Viewport viewport = box.Children[0] as Gtk.Viewport;
-                    Gtk.Layout layout = viewport.Child as Gtk.Layout;
+                    Gtk.Overlay layout = viewport.Child as Gtk.Overlay;
                     foreach (var lab in layout.Children)
                     {
                         if (lab is Gtk.Label label)
@@ -374,7 +412,7 @@ namespace System.Windows.Forms
                 if (this.View == View.Details)
                 {
                     Gtk.Viewport viewport = box.Children[0] as Gtk.Viewport;
-                    Gtk.Layout layout = viewport.Child as Gtk.Layout;
+                    Gtk.Overlay layout = viewport.Child as Gtk.Overlay;
                     foreach (var chk in layout.Children)
                     {
                         if (chk is Gtk.CheckButton chkbutton)
@@ -401,36 +439,38 @@ namespace System.Windows.Forms
         {
             if (self.IsRealized)
             {
-                Gtk.FlowBoxChild boxitem = new Gtk.FlowBoxChild();
-                boxitem.TooltipText = item.Text;
-                boxitem.Data.Add("ItemId", item.Index);
-                boxitem.Halign = Gtk.Align.Start;
-                boxitem.Valign = Gtk.Align.Start;
-                boxitem.BorderWidth = 0;
-                boxitem.Margin = 0;
-                boxitem.HeightRequest = FontSize + 10;
-                item._flowBoxChild = boxitem;
+                int padding = 5;
+                Gtk.FlowBoxChild flowitem = new Gtk.FlowBoxChild();
+                flowitem.TooltipText = item.Text;
+                flowitem.Data.Add("ItemId", item.Index);
+                flowitem.Halign = Gtk.Align.Start;
+                flowitem.Valign = Gtk.Align.Start;
+                flowitem.BorderWidth = 0;
+                flowitem.Margin = 0;
+                flowitem.HeightRequest = FontSize + 10;
+                item._flowBoxChild = flowitem;
                 BoxBase hBox = new BoxBase(Gtk.Orientation.Horizontal, 0);
                 if (item.BackColor.HasValue)
                 {
                     hBox.Override.BackColor = Drawing.Color.FromArgb(180, item.BackColor.Value);
                 }
                 hBox.Valign = Gtk.Align.Fill;
-                hBox.Halign = Gtk.Align.Start;
+                hBox.Halign = Gtk.Align.Fill;
                 hBox.BorderWidth = 0;
+                hBox.Spacing = 0;
                 hBox.Homogeneous = false;
 
                 foreach (ColumnHeader col in Columns)
                 {
                     if (item.SubItems != null && item.SubItems.Count > col.Index)
                     {
-                        boxitem.Data.Add(col.Index, item.SubItems[col.Index].Text);
+                        flowitem.Data.Add(col.Index, item.SubItems[col.Index].Text);
                     }
                     else
-                        boxitem.Data.Add(col.Index, string.Empty);
+                        flowitem.Data.Add(col.Index, string.Empty);
                 }
 
-                boxitem.Add(hBox);
+                flowitem.Add(hBox);
 
                 Gtk.FlowBox flowBox = DefaultGroup.FlowBox;
                 if (this.ShowGroups == true && this.View != View.List && this.View != View.Tile)
@@ -446,106 +486,89 @@ namespace System.Windows.Forms
                 }
 
                 if (position == -1)
-                    flowBox.Add(boxitem);
+                    flowBox.Add(flowitem);
                 else
-                    flowBox.Insert(boxitem, position);
+                    flowBox.Insert(flowitem, position);
 
+                Gtk.Overlay fistcell = new Gtk.Overlay();
+                fistcell.Halign = Gtk.Align.Fill;
+                fistcell.Valign = Gtk.Align.Fill;
+                fistcell.BorderWidth = 1;
+                if (Columns.Count > 0)
+                    fistcell.WidthRequest = Columns[0].Width;
+                else
+                    fistcell.WidthRequest = Width - padding - padding;
+                CheckBox checkBox = new CheckBox();
+                CheckBoxBase checkboxself = checkBox.self;
+                checkboxself.Halign = Gtk.Align.Start;
+                checkboxself.Valign = Gtk.Align.Center;
+                checkboxself.BorderWidth = 0;
+                checkboxself.Relief = ReliefStyle.None;
+                checkboxself.StyleContext.AddClass("ButtonNone");
+                checkboxself.Label = item.Text;
+                checkboxself.Active = item.Checked;
+                checkboxself.DrawIndicator = this.CheckBoxes;
+                checkboxself.WidgetEvent += Checkboxself_WidgetEvent;
+                if (checkboxself.Child is Gtk.Label label)
+                {
+                    label.Halign = Gtk.Align.Start;
+                    label.Valign = Gtk.Align.Fill;
+                    if (item.ForeColor.HasValue)
+                    {
+                        label.Attributes = new Pango.AttrList();
+                        Pango.AttrForeground fg = new Pango.AttrForeground(Convert.ToUInt16(item.ForeColor.Value.R * 257), Convert.ToUInt16(item.ForeColor.Value.G * 257), Convert.ToUInt16(item.ForeColor.Value.B * 257));
+                        label.Attributes.Insert(fg);
+                    }
+                }
+
+                if (fistcell.WidthRequest == -1)
+                    fistcell.Add(checkboxself);
+                else
+                    fistcell.AddOverlay(checkboxself);
+
+                checkboxself.Xalign = 0.0f;
+                checkboxself.Yalign = 0.5f;
+                Gtk.Viewport viewport = new Viewport();
+                viewport.BorderWidth = 0;
+                viewport.Add(fistcell);
+                hBox.PackStart(viewport, true, true, 0);
                 if (this.View == View.Details)
                 {
-                    hBox.Spacing = 0;
-                    header.Visible = true;
-                    flowBox.MinChildrenPerLine = 1;
+                    headerView.ShowAll();
                     flowBox.MaxChildrenPerLine = 1;
-                    Gtk.Layout fistcell = new Gtk.Layout(new Adjustment(IntPtr.Zero), new Adjustment(IntPtr.Zero));
-                    fistcell.Halign = Gtk.Align.Start;
-                    fistcell.Valign = Gtk.Align.Fill;
-                    fistcell.Vexpand = true;
-                    fistcell.BorderWidth = 0;
-                    fistcell.WidthRequest = Columns.Count > 0 ? Columns[0].Width : Width;
-                    fistcell.HeightRequest = boxitem.HeightRequest;
-
-                    int x_position = 5;
-                    int padding = 2;
-                    if (this.CheckBoxes == true)
-                    {
-                        CheckBox checkBox = new CheckBox();
-                        checkBox.self.Halign = Gtk.Align.Start;
-                        checkBox.self.Valign = Gtk.Align.Center;
-                        checkBox.Width = 20;
-                        checkBox.self.BorderWidth = 0;
-                        checkBox.Checked = item.Checked;
-                        checkBox.CheckedChanged += (object sender, EventArgs e) =>
-                        {
-                            CheckBox box = sender as CheckBox;
-                            Gtk.FlowBoxChild checkitem = box.self.Parent.Parent.Parent.Parent as Gtk.FlowBoxChild;
-                            ListViewItem thisitem = this.Items.Find(m => m.Index == Convert.ToInt32(checkitem.Data["ItemId"]));
-                            if (thisitem != null)
-                            {
-                                thisitem.Checked = box.self.Active;
-                                if (ItemCheck != null)
-                                {
-                                    ItemCheck(sender, new ItemCheckEventArgs(checkitem.Index, box.self.Active ? CheckState.Checked : CheckState.Unchecked, box.self.Active ? CheckState.Unchecked : CheckState.Checked));
-                                }
-                                if (ItemChecked != null)
-                                {
-                                    ItemChecked(sender, new ItemCheckedEventArgs(thisitem));
-                                }
-                            }
-                        };
-
-                        fistcell.Put(checkBox.self, x_position, padding);
-                        x_position += 20;
-                    }
-
                     if (this.SmallImageList != null)
                     {
-                        int imgsize = FontSize + 2;
-                        this.SmallImageList.ImageSize = new Size(imgsize, imgsize);
+                        int width = this.SmallImageList.ImageSize.Width;
+                        int height = this.SmallImageList.ImageSize.Height;
+                        if (height > flowitem.HeightRequest)
+                            flowitem.HeightRequest = height;
+
+                        checkboxself.AlwaysShowImage = true;
+                        checkboxself.ImagePosition = PositionType.Left;
                         if (!string.IsNullOrWhiteSpace(item.ImageKey))
                         {
                             Drawing.Image img = this.SmallImageList.GetBitmap(item.ImageKey);
                             if (img != null)
-                                fistcell.Put(new Gtk.Image(img.Pixbuf) { Halign = Gtk.Align.Start, Valign = Gtk.Align.Fill }, x_position, padding + 2);
-                            x_position += imgsize + 5;
+                            {
+                                checkboxself.Image = new Gtk.Image(img.Pixbuf) { WidthRequest = width, HeightRequest = height, Halign = Align.Start };
+                            }
                         }
                         else if (item.ImageIndex > -1)
                         {
                             Drawing.Image img = this.SmallImageList.GetBitmap(item.ImageIndex);
                             if (img != null)
-                                fistcell.Put(new Gtk.Image(img.Pixbuf) { Halign = Gtk.Align.Start, Valign = Gtk.Align.Fill }, x_position, padding + 2);
-                            x_position += imgsize + 5;
+                            {
+                                checkboxself.Image = new Gtk.Image(img.Pixbuf) { WidthRequest = width, HeightRequest = height, Halign = Align.Start };
+                            }
                         }
                     }
-                    Gtk.Label lab = new Gtk.Label();
-                    Pango.AttrList attributes = new Pango.AttrList();
-                    if (item.ForeColor.HasValue)
-                    {
-                        Pango.AttrForeground fg = new Pango.AttrForeground(Convert.ToUInt16(item.ForeColor.Value.R * 257), Convert.ToUInt16(item.ForeColor.Value.G * 257), Convert.ToUInt16(item.ForeColor.Value.B * 257));
-                        attributes.Insert(fg);
-                    }
-                    lab.Attributes = attributes;
-                    lab.Halign = Gtk.Align.Start;
-                    lab.Valign = Gtk.Align.Fill;
-                    lab.Ellipsize = Pango.EllipsizeMode.End;
-                    lab.Text = item.Text;
-                    lab.Xalign = 0;
-                    lab.Xpad = 0;
-                    lab.Ypad = 0;
-                    lab.WidthRequest = fistcell.WidthRequest - x_position;
-                    fistcell.Put(lab, x_position, padding);
-                    Gtk.Viewport viewport = new Viewport();
-                    viewport.WidthRequest = Columns.Count > 0 ? Columns[0].Width : Width;
-                    viewport.BorderWidth = 0;
-                    viewport.Add(fistcell);
-                    hBox.PackStart(viewport, false, true, 0);
-
                     int index = 0;
                     foreach (ColumnHeader col in Columns)
                     {
                         if (index > 0)
                         {
-                            Gtk.Layout sublayout = new Gtk.Layout(new Adjustment(IntPtr.Zero), new Adjustment(IntPtr.Zero));
-                            sublayout.Halign = Gtk.Align.Start;
+                            Gtk.Overlay sublayout = new Gtk.Overlay();
+                            sublayout.Halign = Gtk.Align.Fill;
                             sublayout.Valign = Gtk.Align.Fill;
                             sublayout.WidthRequest = col.Width;
                             if (item.SubItems != null && item.SubItems.Count > index)
@@ -553,116 +576,52 @@ namespace System.Windows.Forms
                                 ListViewItem.ListViewSubItem subitem = item.SubItems[index];
                                 Gtk.Label sublabel = new Gtk.Label();
                                 subitem._label = sublabel;
-                                Pango.AttrList subattributes = new Pango.AttrList();
+
                                 if (subitem.ForeColor.HasValue)
                                 {
+                                    sublabel.Attributes = new Pango.AttrList();
                                     Pango.AttrForeground fg = new Pango.AttrForeground(Convert.ToUInt16(subitem.ForeColor.Value.R * 257), Convert.ToUInt16(subitem.ForeColor.Value.G * 257), Convert.ToUInt16(subitem.ForeColor.Value.B * 257));
-                                    subattributes.Insert(fg);
-                                    sublabel.Attributes = subattributes;
+                                    sublabel.Attributes.Insert(fg);
                                 }
-                                sublabel.Attributes = subattributes;
-                                sublabel.WidthRequest = col.Width + 2;
+                                sublabel.WidthChars = 0;
                                 sublabel.MaxWidthChars = 0;
-
                                 sublabel.Halign = Gtk.Align.Fill;
-                                sublabel.Valign = Gtk.Align.Fill;
+                                sublabel.Valign = Gtk.Align.Center;
+                                sublabel.MarginStart = padding;
+                                sublabel.Xalign = 0.0f;
+                                sublabel.Yalign = 0.5f;
                                 sublabel.Ellipsize = Pango.EllipsizeMode.End;
                                 sublabel.Text = subitem.Text;
-                                sublayout.Add(sublabel);
+                                sublayout.AddOverlay(sublabel);
                             }
                             Gtk.Viewport sviewport = new Viewport();
-                            sviewport.WidthRequest = col.Width;
                             sviewport.BorderWidth = 0;
                             sviewport.Add(sublayout);
-                            hBox.PackStart(sviewport, false, true, 0);
+                            hBox.PackStart(sviewport, true, true, 0);
                         }
                         index++;
                     }
                 }
                 else
                 {
-                    if (this.CheckBoxes == true)
+                    headerView.Hide();
+                    if (this.View == View.LargeIcon)
                     {
-                        CheckBox checkBox = new CheckBox();
-                        checkBox.self.Halign = Gtk.Align.Start;
-                        checkBox.self.Valign = Gtk.Align.Center;
-                        checkBox.Width = 20;
-                        checkBox.self.BorderWidth = 0;
-                        checkBox.Checked = item.Checked;
-                        checkBox.CheckedChanged += (object sender, EventArgs e) =>
-                        {
-                            CheckBox box = sender as CheckBox;
-                            Gtk.FlowBoxChild checkitem = box.self.Parent.Parent as Gtk.FlowBoxChild;
-                            ListViewItem thisitem = this.Items.Find(m => m.Index == Convert.ToInt32(checkitem.Data["ItemId"]));
-                            if (thisitem != null)
-                            {
-                                thisitem.Checked = box.self.Active;
-                                if (ItemCheck != null)
-                                {
-                                    ItemCheck(sender, new ItemCheckEventArgs(checkitem.Index, box.self.Active ? CheckState.Checked : CheckState.Unchecked, box.self.Active ? CheckState.Unchecked : CheckState.Checked));
-                                }
-                                if (ItemChecked != null)
-                                {
-                                    ItemChecked(sender, new ItemCheckedEventArgs(thisitem));
-                                }
-                            }
-                        };
-                        hBox.PackStart(checkBox.self, false, true, 5);
-                    }
-                    if (this.View == View.SmallIcon)
-                    {
-                        header.Visible = false;
-                        flowBox.MinChildrenPerLine = 1;
-                        flowBox.MaxChildrenPerLine = 999;
-                        if (this.SmallImageList != null)
-                        {
-                            this.SmallImageList.ImageSize = new Size(16, 16);
-                            if (!string.IsNullOrWhiteSpace(item.ImageKey))
-                            {
-                                Drawing.Image img = this.SmallImageList.GetBitmap(item.ImageKey);
-                                if (img != null)
-                                    hBox.PackStart(new Gtk.Image(img.Pixbuf), false, false, 0);
-                            }
-                            else if (item.ImageIndex > -1)
-                            {
-                                Drawing.Image img = this.SmallImageList.GetBitmap(item.ImageIndex);
-                                if (img != null)
-                                    hBox.PackStart(new Gtk.Image(img.Pixbuf), false, false, 0);
-                            }
-
-                        }
-                        Gtk.Label lab = new Gtk.Label();
-                        Pango.AttrList attributes = new Pango.AttrList();
-                        if (item.ForeColor.HasValue)
-                        {
-                            Pango.AttrForeground fg = new Pango.AttrForeground(Convert.ToUInt16(item.ForeColor.Value.R * 257), Convert.ToUInt16(item.ForeColor.Value.G * 257), Convert.ToUInt16(item.ForeColor.Value.B * 257));
-                            attributes.Insert(fg);
-                        }
-                        lab.Attributes = attributes;
-                        lab.Xpad = 5;
-                        lab.MaxWidthChars = 100;
-                        lab.Halign = Gtk.Align.Start;
-                        lab.Valign = Gtk.Align.Center;
-                        lab.Ellipsize = Pango.EllipsizeMode.End;
-                        lab.Text = item.Text;
-                        hBox.PackStart(lab, false, false, 0);
-                    }
-                    else if (this.View == View.LargeIcon)
-                    {
-                        flowBox.MinChildrenPerLine = 1;
-                        flowBox.MaxChildrenPerLine = 999;
-                        Gtk.Box vBox = new Gtk.Box(Gtk.Orientation.Vertical, 5);
                         if (this.LargeImageList != null)
                         {
-                            this.SmallImageList.ImageSize = new Size(100, 100);
+                            int width = this.LargeImageList.ImageSize.Width;
+                            int height = this.LargeImageList.ImageSize.Height;
+                            flowitem.WidthRequest = width + 40;
+                            flowitem.HeightRequest = height + FontSize + 20;
+
+                            checkboxself.AlwaysShowImage = true;
+                            checkboxself.ImagePosition = PositionType.Top;
                             if (!string.IsNullOrWhiteSpace(item.ImageKey))
                             {
                                 Drawing.Image img = this.LargeImageList.GetBitmap(item.ImageKey);
                                 if (img != null)
                                 {
-                                    int width = img.Pixbuf.Width;
-                                    int height = img.Pixbuf.Height;
-                                    vBox.Add(new Gtk.Image(new Gdk.Pixbuf(img.PixbufData)) { WidthRequest = Math.Min(50, width), HeightRequest = Math.Min(50, height) });
+                                    checkboxself.Image = new Gtk.Image(img.Pixbuf) { WidthRequest = width, HeightRequest = height, Halign = Align.Start };
                                 }
                             }
                             else if (item.ImageIndex > -1)
@@ -670,55 +629,88 @@ namespace System.Windows.Forms
                                 Drawing.Image img = this.LargeImageList.GetBitmap(item.ImageIndex);
                                 if (img != null)
                                 {
-                                    int width = img.Pixbuf.Width;
-                                    int height = img.Pixbuf.Height;
-                                    vBox.Add(new Gtk.Image(img.Pixbuf) { WidthRequest = Math.Min(50, width), HeightRequest = Math.Min(50, height) });
+                                    checkboxself.Image = new Gtk.Image(img.Pixbuf) { WidthRequest = width, HeightRequest = height, Halign = Align.Start };
                                 }
                             }
                         }
-                        Gtk.Label lab = new Gtk.Label();
-                        Pango.AttrList attributes = new Pango.AttrList();
-                        if (item.ForeColor.HasValue)
-                        {
-                            Pango.AttrForeground fg = new Pango.AttrForeground(Convert.ToUInt16(item.ForeColor.Value.R * 257), Convert.ToUInt16(item.ForeColor.Value.G * 257), Convert.ToUInt16(item.ForeColor.Value.B * 257));
-                            attributes.Insert(fg);
-
-                        }
-                        lab.Attributes = attributes;
-                        lab.Xpad = 5;
-                        lab.MaxWidthChars = 16;
-                        lab.Halign = Gtk.Align.Center;
-                        lab.Valign = Gtk.Align.Center;
-                        lab.Ellipsize = Pango.EllipsizeMode.End;
-                        lab.Text = item.Text;
-                        vBox.Add(lab);
-                        hBox.PackStart(vBox, false, false, 0);
                     }
                     else
                     {
-                        header.Visible = false;
-                        boxitem.Halign = Gtk.Align.Fill;
-
-                        Gtk.Label lab = new Gtk.Label();
-                        Pango.AttrList attributes = new Pango.AttrList();
-                        if (item.ForeColor.HasValue)
+                        if (this.SmallImageList != null)
                         {
-                            Pango.AttrForeground fg = new Pango.AttrForeground(Convert.ToUInt16(item.ForeColor.Value.R * 257), Convert.ToUInt16(item.ForeColor.Value.G * 257), Convert.ToUInt16(item.ForeColor.Value.B * 257));
-                            attributes.Insert(fg);
+                            int width = this.SmallImageList.ImageSize.Width;
+                            int height = this.SmallImageList.ImageSize.Height;
+                            if (height > flowitem.HeightRequest)
+                                flowitem.HeightRequest = height;
 
+                            checkboxself.AlwaysShowImage = true;
+                            checkboxself.ImagePosition = PositionType.Left;
+                            if (!string.IsNullOrWhiteSpace(item.ImageKey))
+                            {
+                                Drawing.Image img = this.SmallImageList.GetBitmap(item.ImageKey);
+                                if (img != null)
+                                {
+                                    checkboxself.Image = new Gtk.Image(img.Pixbuf) { WidthRequest = width, HeightRequest = height, Halign = Align.Start };
+                                }
+                            }
+                            else if (item.ImageIndex > -1)
+                            {
+                                Drawing.Image img = this.SmallImageList.GetBitmap(item.ImageIndex);
+                                if (img != null)
+                                {
+                                    checkboxself.Image = new Gtk.Image(img.Pixbuf) { WidthRequest = width, HeightRequest = height, Halign = Align.Start };
+                                }
+                            }
                         }
-                        lab.Attributes = attributes;
-                        lab.Halign = Gtk.Align.Start;
-                        lab.Valign = Gtk.Align.Fill;
-                        lab.Text = item.Text;
-                        hBox.PackStart(lab, false, false, 0);
                     }
                 }
                 if (IsCacheUpdate == false)
                     self.ShowAll();
             }
         }
-
+        private void Checkboxself_WidgetEvent(object o, WidgetEventArgs args)
+        {
+            if (args.Event.Type is Gdk.EventType.ButtonRelease && args.Event is Gdk.EventButton event2 && event2.Button == 1)
+            {
+                Gtk.CheckButton checkButton = (Gtk.CheckButton)o;
+                if (event2.X < 25)
+                {
+                    checkButton.Active = !checkButton.Active;
+                    OnCheckedChanged(checkButton.Data["Control"]);
+                }
+                else
+                {
+                    Gtk.FlowBox flowbox = checkButton.Parent.Parent.Parent.Parent.Parent as Gtk.FlowBox;
+                    flowbox.ProcessEvent(args.Event);
+                }
+                args.RetVal = true;
+            }
+            else if (args.Event.Type is Gdk.EventType.ButtonPress)
+            {
+                Gtk.CheckButton checkButton = (Gtk.CheckButton)o;
+                Gtk.FlowBox flowbox = checkButton.Parent.Parent.Parent.Parent.Parent as Gtk.FlowBox;
+                flowbox.ProcessEvent(args.Event);
+                args.RetVal = true;
+            }
+        }
+        private void OnCheckedChanged(object? sender)
+        {
+            CheckBox box = sender as CheckBox;
+            Gtk.FlowBoxChild checkitem = box.self.Parent.Parent.Parent.Parent as Gtk.FlowBoxChild;
+            ListViewItem thisitem = this.Items.Find(m => m._flowBoxChild.Handle == checkitem.Handle);
+            if (thisitem != null)
+            {
+                thisitem.Checked = box.self.Active;
+                if (ItemCheck != null)
+                {
+                    ItemCheck(sender, new ItemCheckEventArgs(checkitem.Index, box.self.Active ? CheckState.Checked : CheckState.Unchecked, box.self.Active ? CheckState.Unchecked : CheckState.Checked));
+                }
+                if (ItemChecked != null && box.self.Active == true)
+                {
+                    ItemChecked(sender, new ItemCheckedEventArgs(thisitem));
+                }
+            }
+        }
         internal void NativeGroupAdd(ListViewGroup group, int position)
         {
             if (self.IsRealized)
@@ -728,16 +720,13 @@ namespace System.Windows.Forms
 
                 if (position == -1 && Groups.Exists(g => g.SerialGuid == group.SerialGuid) == false)
                 {
-                    if (AllowColumnReorder)
+                    if (Sorting == SortOrder.Descending)
                     {
-                        if (Sorting == SortOrder.Descending)
-                        {
-                            position = Groups.OrderByDescending(o => o.Header).ToList().FindIndex(g => g.Name == group.Name);
-                        }
-                        else if (Sorting == SortOrder.Ascending)
-                        {
-                            position = Groups.OrderBy(o => o.Header).ToList().FindIndex(g => g.Name == group.Name);
-                        }
+                        position = Groups.OrderByDescending(o => o.Header).ToList().FindIndex(g => g.Name == group.Name);
+                    }
+                    else if (Sorting == SortOrder.Ascending)
+                    {
+                        position = Groups.OrderBy(o => o.Header).ToList().FindIndex(g => g.Name == group.Name);
                     }
                 }
 
@@ -770,8 +759,9 @@ namespace System.Windows.Forms
                         {
                             groupbox.NoShowAll = true;
                             groupbox.Visible = false;
-                            _flow.StyleContext.AddClass("GridBorder");
                         }
+                        if (this.View == View.Details)
+                            _flow.StyleContext.AddClass("GridBorder");
                     }
                     else
                     {
@@ -779,8 +769,9 @@ namespace System.Windows.Forms
                         {
                             defbox.NoShowAll = false;
                             defbox.Visible = true;
-                            DefaultGroup.FlowBox.StyleContext.RemoveClass("GridBorder");
                         }
+                        if (this.View == View.Details)
+                            _flow.StyleContext.AddClass("GridBorder");
                     }
 
                     hBox.PackStart(groupbox, false, false, 0);
@@ -802,28 +793,28 @@ namespace System.Windows.Forms
                 _flow.BorderWidth = 0;
                 _flow.Homogeneous = false;
                 _flow.Orientation = Gtk.Orientation.Horizontal;
-                _flow.MaxChildrenPerLine = 500u;
+                _flow.MaxChildrenPerLine = 50u;
                 _flow.MinChildrenPerLine = 0u;
                 _flow.Halign = Gtk.Align.Fill;
                 _flow.Valign = Gtk.Align.Start;
-                _flow.SelectionMode = MultiSelect == false ? Gtk.SelectionMode.Single : Gtk.SelectionMode.Multiple;
-                _flow.ActivateOnSingleClick = MultiSelect == false;
+                _flow.SelectionMode = _MultiSelect == false ? Gtk.SelectionMode.Single : Gtk.SelectionMode.Multiple;
+                _flow.ActivateOnSingleClick = _MultiSelect == false;
                 _flow.SortFunc = new Gtk.FlowBoxSortFunc((fbc1, fbc2) =>
                 {
-                    if (SortingColumnIndex > -1)
+                    if (SortColumn != null)
                     {
                         if (this.Sorting == SortOrder.Ascending)
-                            return fbc2.Data[SortingColumnIndex].ToString().CompareTo(fbc1.Data[SortingColumnIndex].ToString());
+                            return fbc2.Data[SortColumn.Index].ToString().CompareTo(fbc1.Data[SortColumn.Index].ToString());
                         else if (this.Sorting == SortOrder.Descending)
-                            return fbc1.Data[SortingColumnIndex].ToString().CompareTo(fbc2.Data[SortingColumnIndex].ToString());
+                            return fbc1.Data[SortColumn.Index].ToString().CompareTo(fbc2.Data[SortColumn.Index].ToString());
                         else
                             return fbc2.Index.CompareTo(fbc1.Index);
                     }
                     else
                         return 0;
                 });
-                _flow.ChildActivated += _flow_ChildActivated;
                 _flow.SelectedChildrenChanged += _flow_SelectedChildrenChanged;
+                _flow.ButtonReleaseEvent += _flow_ButtonReleaseEvent;
                 hBox.PackStart(_flow, false, true, 0);
 
                 if (ShowGroups == true && this.View != View.List && this.View != View.Tile)
@@ -850,76 +841,53 @@ namespace System.Windows.Forms
             }
         }
 
+        private void _flow_ButtonReleaseEvent(object o, ButtonReleaseEventArgs args)
+        {
+            Gtk.FlowBox widget = (Gtk.FlowBox)o;
+            if (_MultiSelect == false || ModifierKeys.HasFlag(Keys.Control) == false)
+            {
+                foreach (var group in GetAllGroups())
+                {
+                    if (group.FlowBox.Handle != widget.Handle)
+                        group.FlowBox.UnselectAll();
+                }
+            }
+            if (ItemActivate != null)
+                ItemActivate(this, EventArgs.Empty);
+        }
         private void _flow_SelectedChildrenChanged(object sender, EventArgs e)
         {
             Gtk.FlowBox widget = (Gtk.FlowBox)sender;
-            if (MultiSelect == true)
+            List<IntPtr> selecteds = new List<IntPtr>();
+            foreach (var group in GetAllGroups())
             {
-                if (ItemActivate != null)
-                    ItemActivate(this, e);
-
-                List<int> selecteds = new List<int>();
-                foreach (var group in GetAllGroups())
+                foreach (FlowBoxChild o in group.FlowBox.SelectedChildren)
                 {
-                    foreach (FlowBoxChild o in group.FlowBox.SelectedChildren)
-                    {
-                        if (o.IsSelected)
-                        {
-                            int id = Convert.ToInt32(o.Data["ItemId"]);
-                            selecteds.Add(id);
-                        }
-                    }
+                    selecteds.Add(o.Handle);
                 }
-                foreach (ListViewItem item in Items)
+            }
+            foreach (ListViewItem item in Items)
+            {
+                if (selecteds.Contains(item._flowBoxChild.Handle))
                 {
-                    if (selecteds.Contains(item.Index))
+                    if (item._selected == false)
                     {
-                        if (item.Selected == false)
-                        {
-                            item.Selected = true;
-                            if (ItemSelectionChanged != null)
-                                ItemSelectionChanged(this, new ListViewItemSelectionChangedEventArgs(item, item.Index, item.Selected));
-                        }
-                    }
-                    else if (item.Selected == true)
-                    {
-                        item.Selected = false;
+                        item._selected = true;
                         if (ItemSelectionChanged != null)
                             ItemSelectionChanged(this, new ListViewItemSelectionChangedEventArgs(item, item.Index, item.Selected));
                     }
                 }
+                else if (item._selected == true)
+                {
+                    item._selected = false;
+                    if (ItemSelectionChanged != null)
+                        ItemSelectionChanged(this, new ListViewItemSelectionChangedEventArgs(item, item.Index, item.Selected));
+                }
             }
-
             if (SelectedIndexChanged != null)
                 SelectedIndexChanged(this, e);
         }
-        private void _flow_ChildActivated(object o, Gtk.ChildActivatedArgs args)
-        {
-            Gtk.FlowBox widget = (Gtk.FlowBox)o;
-            ListViewItem item = this.Items.Find(m => m.Index == Convert.ToInt32(args.Child.Data["ItemId"]));
-            if (item != null)
-            {
-                item._selected = args.Child.IsSelected;
-                foreach (var group in GetAllGroups())
-                {
-                    if (group.FlowBox.Equals(widget) == false)
-                    {
-                        group.FlowBox.UnselectAll();
-                    }
-                }
-                if (ItemActivate != null)
-                    ItemActivate(this, args);
-                if (ItemSelectionChanged != null)
-                    ItemSelectionChanged(this, new ListViewItemSelectionChangedEventArgs(item, item.Index, item.Selected));
-            }
-        }
-        public void Sort()
-        {
-            foreach (var group in GetAllGroups())
-            {
-                group.FlowBox.InvalidateSort();
-            }
-        }
+
         private bool IsCacheUpdate;
         public void BeginUpdate()
         {
@@ -1291,10 +1259,31 @@ namespace System.Windows.Forms
                 base.Insert(index, item);
                 return item;
             }
-
+            public new void RemoveAt(int index)
+            {
+                if (index < Count && index >= 0)
+                {
+                    ListViewItem item = this[index];
+                    Remove(item);
+                }
+            }
+            public new void Remove(ListViewItem item)
+            {
+                if (item != null)
+                {
+                    if (item._flowBoxChild?.Parent is Gtk.FlowBox flow)
+                    {
+                        flow.Remove(item._flowBoxChild);
+                        item._flowBoxChild.Destroy();
+                    }
+                    base.Remove(item);
+                }
+            }
             public virtual void RemoveByKey(string key)
             {
-                base.Remove(base.Find(w => w.Name == key));
+                ListViewItem item = base.Find(w => w.Name == key);
+                if (item != null)
+                    Remove(item);
             }
             public new void Clear()
             {
@@ -1361,7 +1350,7 @@ namespace System.Windows.Forms
             }
         }
 
-        public bool FullRowSelect { get; set; }
+        public bool FullRowSelect { get; set; } = true;
 
         public ListViewGroupCollection Groups
         {

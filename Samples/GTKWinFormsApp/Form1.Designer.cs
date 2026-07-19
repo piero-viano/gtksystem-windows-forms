@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Drawing;
 
+
 namespace GTKWinFormsApp
 {
     partial class Form1
@@ -36,23 +37,28 @@ namespace GTKWinFormsApp
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
-            TreeNode treeNode1 = new TreeNode("Node21");
-            TreeNode treeNode2 = new TreeNode("Node22");
-            TreeNode treeNode3 = new TreeNode("Node2", new TreeNode[] { treeNode1, treeNode2 });
-            TreeNode treeNode4 = new TreeNode("Node3");
-            TreeNode treeNode5 = new TreeNode("Node0", new TreeNode[] { treeNode3, treeNode4 });
-            TreeNode treeNode6 = new TreeNode("Node1");
-            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            DataGridViewCellStyle dataGridViewCellStyle13 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle14 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle16 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle17 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle18 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle15 = new DataGridViewCellStyle();
+            TreeNode treeNode13 = new TreeNode("Node21");
+            TreeNode treeNode14 = new TreeNode("Node22");
+            TreeNode treeNode15 = new TreeNode("Node2", new TreeNode[] { treeNode13, treeNode14 });
+            TreeNode treeNode16 = new TreeNode("Node3");
+            TreeNode treeNode17 = new TreeNode("Node0", new TreeNode[] { treeNode15, treeNode16 });
+            TreeNode treeNode18 = new TreeNode("Node1");
             button1 = new Button();
             comboBox1 = new ComboBox();
             textBox1 = new TextBox();
             dataGridView1 = new DataGridView();
+            ID = new DataGridViewTextBoxColumn();
+            State = new DataGridViewCheckBoxColumn();
+            Title = new DataGridViewTextBoxColumn();
+            CreateDate = new DataGridViewComboBoxColumn();
+            Operate = new DataGridViewButtonColumn();
+            PIC = new DataGridViewImageColumn();
             groupBox1 = new GroupBox();
             checkBox2 = new CheckBox();
             linkLabel1 = new LinkLabel();
@@ -79,7 +85,6 @@ namespace GTKWinFormsApp
             richTextBox1 = new RichTextBox();
             flowLayoutPanel1 = new FlowLayoutPanel();
             button4 = new Button();
-            button5 = new Button();
             checkBox3 = new CheckBox();
             label4 = new Label();
             checkBox1 = new CheckBox();
@@ -87,6 +92,7 @@ namespace GTKWinFormsApp
             button3 = new Button();
             pictureBox1 = new PictureBox();
             pictureBox2 = new PictureBox();
+            button5 = new Button();
             treeView1 = new TreeView();
             contextMenuStrip1 = new ContextMenuStrip(components);
             toolStripMenuItem1 = new ToolStripMenuItem();
@@ -100,12 +106,6 @@ namespace GTKWinFormsApp
             toolStripMenuItem4 = new ToolStripMenuItem();
             二级菜单1ToolStripMenuItem = new ToolStripMenuItem();
             splitContainer2 = new SplitContainer();
-            ID = new DataGridViewTextBoxColumn();
-            State = new DataGridViewCheckBoxColumn();
-            Title = new DataGridViewTextBoxColumn();
-            CreateDate = new DataGridViewComboBoxColumn();
-            Operate = new DataGridViewButtonColumn();
-            PIC = new DataGridViewImageColumn();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numericUpDown1).BeginInit();
@@ -145,6 +145,7 @@ namespace GTKWinFormsApp
             // 
             // comboBox1
             // 
+            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox1.FormattingEnabled = true;
             comboBox1.Items.AddRange(new object[] { "test1", "test2", "test3333333333333333333", "这是下拉列表控件数据测试" });
             comboBox1.Location = new Point(267, 29);
@@ -152,9 +153,6 @@ namespace GTKWinFormsApp
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(154, 28);
             comboBox1.TabIndex = 1;
-            comboBox1.DropDown += comboBox1_DropDown;
-            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
-            comboBox1.SelectedValueChanged += comboBox1_SelectedValueChanged;
             // 
             // textBox1
             // 
@@ -162,70 +160,115 @@ namespace GTKWinFormsApp
             textBox1.Location = new Point(63, 31);
             textBox1.Margin = new Padding(4);
             textBox1.Name = "textBox1";
-           // textBox1.PlaceholderText = "选择颜色";
             textBox1.Size = new Size(256, 27);
             textBox1.TabIndex = 2;
-            textBox1.TextChanged += textBox1_TextChanged;
-            textBox1.Enter += textBox1_Enter;
-            textBox1.KeyDown += textBox1_KeyDown;
-            textBox1.KeyPress += textBox1_KeyPress;
-            textBox1.KeyUp += textBox1_KeyUp;
-            textBox1.Validating += textBox1_Validating;
             // 
             // dataGridView1
             // 
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.LightCyan;
-            dataGridViewCellStyle1.ForeColor = Color.Red;
-            dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle2.BackColor = SystemColors.Control;
-            dataGridViewCellStyle2.Font = new Font("Microsoft YaHei UI", 9F);
-            dataGridViewCellStyle2.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-            dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle13.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle13.BackColor = Color.LightCyan;
+            dataGridViewCellStyle13.ForeColor = Color.Red;
+            dataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle14.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle14.BackColor = SystemColors.MenuBar;
+            dataGridViewCellStyle14.Font = new Font("Microsoft YaHei UI", 9F);
+            dataGridViewCellStyle14.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle14.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle14.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle14.WrapMode = DataGridViewTriState.True;
+            dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle14;
             dataGridView1.ColumnHeadersHeight = 29;
             dataGridView1.Columns.AddRange(new DataGridViewColumn[] { ID, State, Title, CreateDate, Operate, PIC });
-            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = SystemColors.Window;
-            dataGridViewCellStyle4.Font = new Font("Microsoft YaHei UI", 9F);
-            dataGridViewCellStyle4.ForeColor = Color.Honeydew;
-            dataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.True;
-            dataGridView1.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle16.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle16.BackColor = SystemColors.Window;
+            dataGridViewCellStyle16.Font = new Font("Microsoft YaHei UI", 9F);
+            dataGridViewCellStyle16.ForeColor = Color.Honeydew;
+            dataGridViewCellStyle16.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle16.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle16.WrapMode = DataGridViewTriState.True;
+            dataGridView1.DefaultCellStyle = dataGridViewCellStyle16;
             dataGridView1.Dock = DockStyle.Fill;
             dataGridView1.Location = new Point(0, 0);
             dataGridView1.Margin = new Padding(4);
             dataGridView1.Name = "dataGridView1";
-            dataGridViewCellStyle5.BackColor = SystemColors.Control;
-            dataGridViewCellStyle5.Font = new Font("Microsoft YaHei UI", 9F);
-            dataGridViewCellStyle5.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle5.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = SystemColors.HighlightText;
-            dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle17.BackColor = SystemColors.Control;
+            dataGridViewCellStyle17.Font = new Font("Microsoft YaHei UI", 9F);
+            dataGridViewCellStyle17.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle17.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle17.SelectionForeColor = SystemColors.HighlightText;
+            dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle17;
             dataGridView1.RowHeadersWidth = 51;
-            dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = Color.LightGoldenrodYellow;
-            dataGridViewCellStyle6.ForeColor = Color.FromArgb(0, 0, 192);
-            dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle18.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle18.BackColor = Color.LightGoldenrodYellow;
+            dataGridViewCellStyle18.ForeColor = Color.FromArgb(0, 0, 192);
+            dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle18;
             dataGridView1.RowTemplate.Height = 46;
             dataGridView1.RowTemplate.Resizable = DataGridViewTriState.True;
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dataGridView1.Size = new Size(1173, 335);
             dataGridView1.TabIndex = 2;
-            dataGridView1.MultiSelectChanged += dataGridView1_MultiSelectChanged;
-            dataGridView1.CellClick += dataGridView1_CellClick;
-            dataGridView1.CellEnter += dataGridView1_CellEnter;
-            dataGridView1.CellLeave += dataGridView1_CellLeave;
-            dataGridView1.CellValidated += dataGridView1_CellValidated;
-            dataGridView1.CellValidating += dataGridView1_CellValidating;
-            dataGridView1.CellValueChanged += dataGridView1_CellValueChanged;
-            dataGridView1.RowEnter += dataGridView1_RowEnter;
-            dataGridView1.RowLeave += dataGridView1_RowLeave;
-            dataGridView1.SelectionChanged += dataGridView1_SelectionChanged;
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            // 
+            // ID
+            // 
+            ID.DataPropertyName = "ID";
+            ID.HeaderText = "序号";
+            ID.MinimumWidth = 6;
+            ID.Name = "ID";
+            ID.ReadOnly = true;
+            ID.Resizable = DataGridViewTriState.False;
+            ID.SortMode = DataGridViewColumnSortMode.NotSortable;
+            ID.Width = 160;
+            // 
+            // State
+            // 
+            State.DataPropertyName = "State";
+            State.HeaderText = "状态";
+            State.MinimumWidth = 6;
+            State.Name = "State";
+            State.ReadOnly = true;
+            State.Resizable = DataGridViewTriState.False;
+            State.Width = 125;
+            // 
+            // Title
+            // 
+            Title.DataPropertyName = "Title";
+            dataGridViewCellStyle15.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle15.BackColor = Color.FromArgb(192, 255, 192);
+            dataGridViewCellStyle15.ForeColor = Color.FromArgb(192, 0, 0);
+            dataGridViewCellStyle15.WrapMode = DataGridViewTriState.True;
+            Title.DefaultCellStyle = dataGridViewCellStyle15;
+            Title.HeaderText = "标题";
+            Title.MinimumWidth = 6;
+            Title.Name = "Title";
+            Title.Resizable = DataGridViewTriState.True;
+            Title.Width = 250;
+            // 
+            // CreateDate
+            // 
+            CreateDate.DataPropertyName = "CreateDate";
+            CreateDate.HeaderText = "日期\r\n时间";
+            CreateDate.Items.AddRange(new object[] { "2012-09-12 12:32:11", "2012-09-13 12:32:22", "2012-09-14 12:32:33" });
+            CreateDate.MinimumWidth = 6;
+            CreateDate.Name = "CreateDate";
+            CreateDate.Resizable = DataGridViewTriState.True;
+            CreateDate.SortMode = DataGridViewColumnSortMode.Automatic;
+            CreateDate.Width = 180;
+            // 
+            // Operate
+            // 
+            Operate.DataPropertyName = "Operate";
+            Operate.HeaderText = "操作";
+            Operate.MinimumWidth = 6;
+            Operate.Name = "Operate";
+            Operate.Width = 160;
+            // 
+            // PIC
+            // 
+            PIC.DataPropertyName = "PIC";
+            PIC.HeaderText = "图片";
+            PIC.MinimumWidth = 6;
+            PIC.Name = "PIC";
+            PIC.Width = 225;
             // 
             // groupBox1
             // 
@@ -261,8 +304,6 @@ namespace GTKWinFormsApp
             checkBox2.TabIndex = 6;
             checkBox2.Text = "全部勾选";
             checkBox2.UseVisualStyleBackColor = true;
-            checkBox2.CheckedChanged += checkBox2_CheckedChanged;
-            checkBox2.CheckStateChanged += checkBox2_CheckStateChanged;
             // 
             // linkLabel1
             // 
@@ -294,29 +335,26 @@ namespace GTKWinFormsApp
             // 
             // maskedTextBox2
             // 
-            maskedTextBox2.Location = new Point(63, 72);
+            maskedTextBox2.Location = new Point(63, 70);
             maskedTextBox2.Margin = new Padding(4);
             maskedTextBox2.Name = "maskedTextBox2";
             maskedTextBox2.PasswordChar = '*';
             maskedTextBox2.Size = new Size(256, 27);
             maskedTextBox2.TabIndex = 5;
             maskedTextBox2.Text = "sdfdf43";
-            maskedTextBox2.Validated += maskedTextBox2_Validated;
             // 
             // checkedListBox1
             // 
-            checkedListBox1.CheckOnClick = false;
-            checkedListBox1.ColumnWidth = 50;
+            checkedListBox1.ColumnWidth = 70;
             checkedListBox1.FormattingEnabled = true;
             checkedListBox1.Items.AddRange(new object[] { "北京市", "天津市", "河南省", "山西省", "内蒙古自治区", "辽宁省", "吉林省", "黑龙江省", "上海市", "江苏省", "浙江省", "安徽省", "福建省" });
             checkedListBox1.Location = new Point(677, 22);
             checkedListBox1.Margin = new Padding(4);
             checkedListBox1.MultiColumn = true;
             checkedListBox1.Name = "checkedListBox1";
-            checkedListBox1.Size = new Size(270, 114);
+            checkedListBox1.Size = new Size(270, 92);
             checkedListBox1.TabIndex = 13;
             checkedListBox1.ItemCheck += checkedListBox1_ItemCheck;
-            checkedListBox1.SelectedValueChanged += checkedListBox1_SelectedValueChanged;
             // 
             // radioButton3
             // 
@@ -328,11 +366,10 @@ namespace GTKWinFormsApp
             radioButton3.TabIndex = 12;
             radioButton3.Text = "经济特区";
             radioButton3.UseVisualStyleBackColor = true;
-            radioButton3.CheckedChanged += radioButton3_CheckedChanged;
             // 
             // dateTimePicker1
             // 
-            dateTimePicker1.CustomFormat = "yyyy年MM年dd HH时mm分ss秒";
+            dateTimePicker1.CustomFormat = "yyyy年MM月dd HH时mm分ss秒";
             dateTimePicker1.Format = DateTimePickerFormat.Custom;
             dateTimePicker1.Location = new Point(63, 112);
             dateTimePicker1.Margin = new Padding(4);
@@ -341,7 +378,6 @@ namespace GTKWinFormsApp
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.Size = new Size(256, 27);
             dateTimePicker1.TabIndex = 8;
-            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
             // 
             // radioButton2
             // 
@@ -355,7 +391,6 @@ namespace GTKWinFormsApp
             radioButton2.TabStop = true;
             radioButton2.Text = "直辖市";
             radioButton2.UseVisualStyleBackColor = true;
-            radioButton2.CheckedChanged += radioButton2_CheckedChanged;
             // 
             // label2
             // 
@@ -377,7 +412,6 @@ namespace GTKWinFormsApp
             radioButton1.TabIndex = 10;
             radioButton1.Text = "全国";
             radioButton1.UseVisualStyleBackColor = true;
-            radioButton1.CheckedChanged += radioButton1_CheckedChanged;
             // 
             // numericUpDown1
             // 
@@ -386,7 +420,6 @@ namespace GTKWinFormsApp
             numericUpDown1.Name = "numericUpDown1";
             numericUpDown1.Size = new Size(154, 27);
             numericUpDown1.TabIndex = 9;
-            numericUpDown1.ValueChanged += numericUpDown1_ValueChanged;
             // 
             // maskedTextBox1
             // 
@@ -423,11 +456,10 @@ namespace GTKWinFormsApp
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(1187, 459);
             tabControl1.TabIndex = 4;
-            tabControl1.DrawItem += tabControl1_DrawItem;
-            tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
             // 
             // tabPage1
             // 
+            tabPage1.BackColor = Color.LightCoral;
             tabPage1.Controls.Add(splitContainer1);
             tabPage1.Location = new Point(4, 29);
             tabPage1.Name = "tabPage1";
@@ -435,7 +467,6 @@ namespace GTKWinFormsApp
             tabPage1.Size = new Size(1179, 426);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "数据表格示例";
-            tabPage1.UseVisualStyleBackColor = true;
             // 
             // splitContainer1
             // 
@@ -478,7 +509,6 @@ namespace GTKWinFormsApp
             tabPage2.TabIndex = 1;
             tabPage2.Text = "容器类表格示例";
             tabPage2.UseVisualStyleBackColor = true;
-            tabPage2.Click += tabPage2_Click;
             // 
             // listBox1
             // 
@@ -499,21 +529,21 @@ namespace GTKWinFormsApp
             // 
             // tableLayoutPanel1
             // 
+            tableLayoutPanel1.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            tableLayoutPanel1.AutoScroll = true;
             tableLayoutPanel1.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             tableLayoutPanel1.ColumnCount = 2;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 50F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 220F));
             tableLayoutPanel1.Controls.Add(label5, 0, 0);
-            tableLayoutPanel1.Controls.Add(button6, 1, 1);
+            tableLayoutPanel1.Controls.Add(button6, 1, 0);
             tableLayoutPanel1.Controls.Add(label6, 0, 1);
-            tableLayoutPanel1.Location = new Point(795, 26);
+            tableLayoutPanel1.Location = new Point(700, 4);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 2;
-            //tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 66.29214F));
-            //tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 33.7078667F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 115));
-            tableLayoutPanel1.Size = new Size(291, 181);
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 115F));
+            tableLayoutPanel1.Size = new Size(300, 151);
             tableLayoutPanel1.TabIndex = 7;
             // 
             // label5
@@ -521,28 +551,28 @@ namespace GTKWinFormsApp
             label5.AutoSize = true;
             label5.Location = new Point(4, 1);
             label5.Name = "label5";
-            label5.Size = new Size(131, 120);
+            label5.Size = new Size(44, 36);
             label5.TabIndex = 0;
             label5.Text = "tablelayoutpanel";
             // 
             // button6
             // 
-            button6.Location = new Point(149, 123);
+            button6.Dock = DockStyle.Fill;
+            button6.Location = new Point(55, 41);
             button6.Name = "button6";
-            button6.Size = new Size(94, 29);
+            button6.Size = new Size(40, 39);
             button6.TabIndex = 1;
             button6.Text = "button6";
             button6.UseVisualStyleBackColor = true;
-            button6.Click += button6_Click;
             // 
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(4, 120);
+            label6.Location = new Point(4, 38);
             label6.Name = "label6";
-            label6.Size = new Size(129, 60);
+            label6.Size = new Size(39, 115);
             label6.TabIndex = 0;
-            label6.Text = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd";
+            label6.Text = "dddddddddddddddd";
             // 
             // richTextBox1
             // 
@@ -554,37 +584,30 @@ namespace GTKWinFormsApp
             // 
             // flowLayoutPanel1
             // 
+            flowLayoutPanel1.AutoScroll = true;
             flowLayoutPanel1.Controls.Add(button4);
-            flowLayoutPanel1.Controls.Add(button5);
             flowLayoutPanel1.Controls.Add(checkBox3);
             flowLayoutPanel1.Controls.Add(label4);
+            flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanel1.Location = new Point(308, 26);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(379, 131);
+            flowLayoutPanel1.Size = new Size(281, 117);
             flowLayoutPanel1.TabIndex = 5;
+            flowLayoutPanel1.WrapContents = false;
             // 
             // button4
             // 
             button4.Location = new Point(3, 3);
             button4.Name = "button4";
-            button4.Size = new Size(94, 29);
+            button4.Size = new Size(369, 49);
             button4.TabIndex = 0;
-            button4.Text = "button4";
+            button4.Text = "button4\r\nffffddddddddddddd\r\nddddddddddddddddddddddddddddffff";
             button4.UseVisualStyleBackColor = true;
-            // 
-            // button5
-            // 
-            button5.Location = new Point(103, 3);
-            button5.Name = "button5";
-            button5.Size = new Size(249, 29);
-            button5.TabIndex = 1;
-            button5.Text = "button5";
-            button5.UseVisualStyleBackColor = true;
             // 
             // checkBox3
             // 
             checkBox3.AutoSize = true;
-            checkBox3.Location = new Point(3, 38);
+            checkBox3.Location = new Point(3, 58);
             checkBox3.Name = "checkBox3";
             checkBox3.Size = new Size(109, 24);
             checkBox3.TabIndex = 2;
@@ -594,7 +617,7 @@ namespace GTKWinFormsApp
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(118, 35);
+            label4.Location = new Point(3, 85);
             label4.Name = "label4";
             label4.Size = new Size(125, 20);
             label4.TabIndex = 3;
@@ -603,7 +626,7 @@ namespace GTKWinFormsApp
             // checkBox1
             // 
             checkBox1.AutoSize = true;
-            checkBox1.Location = new Point(1293, 318);
+            checkBox1.Location = new Point(793, 318);
             checkBox1.Margin = new Padding(4);
             checkBox1.Name = "checkBox1";
             checkBox1.Size = new Size(109, 24);
@@ -613,7 +636,7 @@ namespace GTKWinFormsApp
             // 
             // tabPage3
             // 
-            tabPage3.BackColor = Color.LightGray;
+            tabPage3.BackColor = Color.White;
             tabPage3.BackgroundImageLayout = ImageLayout.Zoom;
             tabPage3.Controls.Add(button3);
             tabPage3.Controls.Add(pictureBox1);
@@ -636,25 +659,35 @@ namespace GTKWinFormsApp
             // 
             // pictureBox1
             // 
-            pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
+            pictureBox1.BackgroundImage = Properties.Resources.RC;
+            pictureBox1.ImageLocation = "./Resources/kenan.gif";
             pictureBox1.Location = new Point(401, 28);
             pictureBox1.Margin = new Padding(4);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(333, 220);
-            pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.TabIndex = 5;
             pictureBox1.TabStop = false;
             // 
             // pictureBox2
             // 
-            pictureBox2.ImageLocation = "";
+            pictureBox2.BorderStyle = BorderStyle.FixedSingle;
+            pictureBox2.ImageLocation = "./Resources/gitee.png";
             pictureBox2.Location = new Point(68, 27);
             pictureBox2.Name = "pictureBox2";
             pictureBox2.Size = new Size(286, 221);
-            pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
+            pictureBox2.SizeMode = PictureBoxSizeMode.CenterImage;
             pictureBox2.TabIndex = 14;
             pictureBox2.TabStop = false;
             pictureBox2.Paint += pictureBox2_Paint;
+            // 
+            // button5
+            // 
+            button5.Location = new Point(103, 3);
+            button5.Name = "button5";
+            button5.Size = new Size(149, 29);
+            button5.TabIndex = 1;
+            button5.Text = "button5";
+            button5.UseVisualStyleBackColor = true;
             // 
             // treeView1
             // 
@@ -662,25 +695,21 @@ namespace GTKWinFormsApp
             treeView1.Location = new Point(13, 0);
             treeView1.Margin = new Padding(4);
             treeView1.Name = "treeView1";
-            treeNode1.Name = "";
-            treeNode1.Text = "Node21";
-            treeNode2.Name = "";
-            treeNode2.Text = "Node22";
-            treeNode3.Name = "Node2";
-            treeNode3.Text = "Node2";
-            treeNode4.Name = "Node3";
-            treeNode4.Text = "Node3";
-            treeNode5.Name = "Node0";
-            treeNode5.Text = "Node0";
-            treeNode6.Name = "Node1";
-            treeNode6.Text = "Node1";
-            treeView1.Nodes.AddRange(new TreeNode[] { treeNode5, treeNode6 });
+            treeNode13.Name = "";
+            treeNode13.Text = "Node21";
+            treeNode14.Name = "";
+            treeNode14.Text = "Node22";
+            treeNode15.Name = "Node2";
+            treeNode15.Text = "Node2";
+            treeNode16.Name = "Node3";
+            treeNode16.Text = "Node3";
+            treeNode17.Name = "Node0";
+            treeNode17.Text = "Node0";
+            treeNode18.Name = "Node1";
+            treeNode18.Text = "Node1";
+            treeView1.Nodes.AddRange(new TreeNode[] { treeNode17, treeNode18 });
             treeView1.Size = new Size(197, 660);
             treeView1.TabIndex = 4;
-            treeView1.AfterCollapse += treeView1_AfterCollapse;
-            treeView1.AfterExpand += treeView1_AfterExpand;
-            treeView1.BeforeSelect += treeView1_BeforeSelect;
-            treeView1.AfterSelect += treeView1_AfterSelect;
             // 
             // contextMenuStrip1
             // 
@@ -694,7 +723,6 @@ namespace GTKWinFormsApp
             toolStripMenuItem1.Name = "toolStripMenuItem1";
             toolStripMenuItem1.Size = new Size(123, 24);
             toolStripMenuItem1.Text = "菜单一";
-            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
             // 
             // toolStripMenuItem2
             // 
@@ -716,7 +744,6 @@ namespace GTKWinFormsApp
             menuStrip1.Items.AddRange(new ToolStripItem[] { toolStripMenuItem3, toolStripMenuItem4 });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Padding = new Padding(8, 2, 0, 2);
             menuStrip1.Size = new Size(1409, 29);
             menuStrip1.TabIndex = 7;
             menuStrip1.Text = "menuStrip1";
@@ -727,8 +754,6 @@ namespace GTKWinFormsApp
             toolStripMenuItem3.Name = "toolStripMenuItem3";
             toolStripMenuItem3.Size = new Size(92, 25);
             toolStripMenuItem3.Text = "一级菜单1";
-            toolStripMenuItem3.DropDownItemClicked += toolStripMenuItem3_DropDownItemClicked;
-            toolStripMenuItem3.Click += toolStripMenuItem3_Click;
             // 
             // test1ToolStripMenuItem
             // 
@@ -750,9 +775,6 @@ namespace GTKWinFormsApp
             test2ToolStripMenuItem.Name = "test2ToolStripMenuItem";
             test2ToolStripMenuItem.Size = new Size(161, 26);
             test2ToolStripMenuItem.Text = "二级菜单2";
-            test2ToolStripMenuItem.CheckedChanged += test2ToolStripMenuItem_CheckedChanged;
-            test2ToolStripMenuItem.CheckStateChanged += test2ToolStripMenuItem_CheckStateChanged;
-            test2ToolStripMenuItem.DropDownItemClicked += test2ToolStripMenuItem_DropDownItemClicked;
             // 
             // toolStripMenuItem4
             // 
@@ -785,69 +807,6 @@ namespace GTKWinFormsApp
             splitContainer2.SplitterDistance = 210;
             splitContainer2.TabIndex = 15;
             // 
-            // ID
-            // 
-            ID.DataPropertyName = "ID";
-            ID.HeaderText = "序号";
-            ID.MinimumWidth = 6;
-            ID.Name = "ID";
-            ID.SortMode = DataGridViewColumnSortMode.NotSortable;
-            ID.Width = 160;
-            ID.Resizable = DataGridViewTriState.False;
-            ID.ReadOnly = true;
-            // 
-            // State
-            // 
-            State.DataPropertyName = "State";
-            State.HeaderText = "状态";
-            State.MinimumWidth = 6;
-            State.Name = "State";
-            State.Resizable = DataGridViewTriState.False;
-            State.Width = 125;
-            // 
-            // Title
-            // 
-            Title.DataPropertyName = "Title";
-            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = Color.FromArgb(192, 255, 192);
-            dataGridViewCellStyle3.ForeColor = Color.FromArgb(192, 0, 0);
-            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
-            Title.DefaultCellStyle = dataGridViewCellStyle3;
-            Title.HeaderText = "标题";
-            Title.MinimumWidth = 6;
-            Title.Name = "Title";
-            Title.Resizable = DataGridViewTriState.True;
-            Title.Width = 250;
-             
-            // 
-            // CreateDate
-            // 
-            CreateDate.DataPropertyName = "CreateDate";
-            CreateDate.HeaderText = "日期\r\n时间";
-            CreateDate.Items.AddRange(new object[] { "2012-09-12 12:32:11", "2012-09-13 12:32:22", "2012-09-14 12:32:33" });
-            CreateDate.MinimumWidth = 6;
-            CreateDate.Name = "CreateDate";
-            CreateDate.Resizable = DataGridViewTriState.True;
-            CreateDate.SortMode = DataGridViewColumnSortMode.Automatic;
-            CreateDate.Width = 180;
-            // 
-            // Operate
-            // 
-            Operate.DataPropertyName = "Operate";
-            Operate.HeaderText = "操作";
-            Operate.MinimumWidth = 6;
-            Operate.Name = "Operate";
-            Operate.Width = 160;
- 
-            // 
-            // PIC
-            // 
-            PIC.HeaderText = "图片";
-            PIC.MinimumWidth = 6;
-            PIC.Name = "PIC";
-            PIC.Width = 225;
-            PIC.DataPropertyName = "PIC";
-            // 
             // Form1
             // 
             AutoScaleMode = AutoScaleMode.None;
@@ -856,7 +815,6 @@ namespace GTKWinFormsApp
             ContextMenuStrip = contextMenuStrip1;
             Controls.Add(splitContainer2);
             Controls.Add(menuStrip1);
-            Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip1;
             Margin = new Padding(4);
             Name = "Form1";
@@ -890,7 +848,6 @@ namespace GTKWinFormsApp
             splitContainer2.ResumeLayout(false);
             ResumeLayout(false);
         }
-
         #endregion
 
         private System.Windows.Forms.Button button1;

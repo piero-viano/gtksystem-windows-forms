@@ -8,7 +8,7 @@ namespace System.Windows.Forms
         [Localizable(false)]
         [Bindable(true)]
         [DefaultValue(null)]
-        [TypeConverter(typeof(StringConverter))]
+        //[TypeConverter(typeof(StringConverter))]
         public object Tag { get; set; }
 
         public abstract GridItemCollection GridItems { get; }
@@ -22,6 +22,9 @@ namespace System.Windows.Forms
         public abstract PropertyDescriptor PropertyDescriptor { get; }
 
         public abstract object Value { get; }
+        public virtual void SetValue(object val) {
+            
+        }
 
         public virtual bool Expandable => false;
 

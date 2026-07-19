@@ -6,10 +6,7 @@
  * date: 2024/1/3
  */
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 
 namespace System.Windows.Forms
 {
@@ -21,8 +18,10 @@ namespace System.Windows.Forms
         private ControlCollection _controls;
         public TabPage() : base()
         {
-            _controls = new ControlCollection(this, self.Content);
-            this.Dock = DockStyle.Fill;
+            _controls = new ControlCollection(this, self.contaner);
+            _tabLabel.StyleContext.AddClass("tablabel");
+            self.Halign = Gtk.Align.Fill; 
+            self.Valign = Gtk.Align.Fill;
         }
 
         public TabPage(string text):this()
@@ -46,12 +45,12 @@ namespace System.Windows.Forms
             {
                 return DockStyle.Fill;
             }
-            set { base.Dock = DockStyle.Fill; }
+            set { }
         }
         public override string Text { get { return _tabLabel.Text; } set { _tabLabel.Text = value; } }
         public Gtk.Label TabLabel { get { return _tabLabel; } }
 
-        public new ControlCollection Controls => _controls;
+        public override ControlCollection Controls => _controls;
 
         public int ImageIndex { get; set; }
         public string ImageKey { get; set; }
@@ -62,13 +61,12 @@ namespace System.Windows.Forms
             set
             {
                 base.Padding = value;
-                self.Content.MarginStart = value.Left;
-                self.Content.MarginTop = value.Top;
-                self.Content.MarginEnd = value.Right;
-                self.Content.MarginBottom = value.Bottom;
+                self.contaner.MarginStart = value.Left;
+                self.contaner.MarginTop = value.Top;
+                self.contaner.MarginEnd = value.Right;
+                self.contaner.MarginBottom = value.Bottom;
             }
         }
-        private Size _size;
-        public override Size Size { get => _size; set { _size = value; } }
+        public override Size Size { get; set; }
     }
 }

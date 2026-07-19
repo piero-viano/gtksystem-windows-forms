@@ -7,7 +7,8 @@
 using Gtk;
 using System.Collections;
 using System.ComponentModel;
-using System.Reflection;
+using System.Drawing;
+using System.Text;
 using System.Windows.Forms.GtkRender;
 
 namespace System.Windows.Forms
@@ -36,8 +37,6 @@ namespace System.Windows.Forms
             renderer.Height = RowHeight;
             renderer.Toggled += CellName_Toggled;
             base.PackStart(renderer, true);
-            base.SortMode = DataGridViewColumnSortMode.NotSortable;
-            base.Sizing = TreeViewColumnSizing.GrowOnly;
             _cellRenderer = renderer;
         }
 
@@ -46,12 +45,12 @@ namespace System.Windows.Forms
             TreePath path = new TreePath(args.Path);
             var model = _treeView.Model;
             model.GetIter(out TreeIter iter, path);
-            object cell = model.GetValue(iter, this.Index);
-            if (cell is DataGridViewCell val)
+            object row = model.GetValue(iter, 0);
+            if (row is DataGridViewRow val)
             {
                 CellRendererToggleValue tggle = (CellRendererToggleValue)o;
-                val.Value = tggle.Active == false;
-                _gridview.CellValueChanagedHandler(this.Index, path.Indices.Last());
+                val.Cells[Index].Value = tggle.Active == false;
+                _gridview.CellValueChanagedHandler(Index, iter, path);
             }
         }
         internal override DataGridViewCell NewCell(object value = null, Type valueType = null)
@@ -79,8 +78,6 @@ namespace System.Windows.Forms
             renderer.Height = RowHeight;
             renderer.Toggled += CellName_Toggled;
             base.PackStart(renderer, true);
-            base.SortMode = DataGridViewColumnSortMode.NotSortable;
-            base.Sizing = TreeViewColumnSizing.GrowOnly;
             _cellRenderer = renderer;
         }
 
@@ -89,12 +86,12 @@ namespace System.Windows.Forms
             TreePath path = new TreePath(args.Path);
             var model = _treeView.Model;
             model.GetIter(out TreeIter iter, path);
-            object cell = model.GetValue(iter, this.Index);
-            if (cell is DataGridViewCell val)
+            object row = model.GetValue(iter, 0);
+            if (row is DataGridViewRow val)
             {
                 CellRendererToggleValue tggle = (CellRendererToggleValue)o;
-                val.Value = tggle.Active == false;
-                _gridview.CellValueChanagedHandler(this.Index, path.Indices.Last());
+                val.Cells[Index].Value = tggle.Active == false;
+                _gridview.CellValueChanagedHandler(Index, iter, path);
             }
         }
         internal override DataGridViewCell NewCell(object value = null, Type valueType = null)
@@ -118,27 +115,24 @@ namespace System.Windows.Forms
             _items = new ObjectCollection(this);
             CellRendererComboValue renderer = new CellRendererComboValue(this);
             renderer.Editable = true;
+            renderer.Mode = CellRendererMode.Editable;
             renderer.Edited += Renderer_Edited;
+            renderer.EditingStarted += Renderer_EditingStarted;
             renderer.TextColumn = 0;
             renderer.Height = RowHeight;
             renderer.Model = model;
             base.PackStart(renderer, true);
-            base.SortMode = DataGridViewColumnSortMode.NotSortable;
-            base.Sizing = TreeViewColumnSizing.GrowOnly;
             _cellRenderer = renderer;
         }
-
+        private void Renderer_EditingStarted(object o, EditingStartedArgs args)
+        {
+            _cellEditing = true;
+            _cellEditablePath = args.Path;
+            CellEditable = args.Editable;
+        }
         private void Renderer_Edited(object o, EditedArgs args)
         {
-            TreePath path = new TreePath(args.Path);
-            var model = _treeView.Model;
-            model.GetIter(out TreeIter iter, path);
-            object cell = model.GetValue(iter, this.Index);
-            if (cell is DataGridViewCell val)
-            {
-                val.Value = args.NewText;
-                _gridview.CellValueChanagedHandler(this.Index, path.Indices.Last());
-            }
+            RendererEdited(args.Path, args.NewText);
         }
         internal override DataGridViewCell NewCell(object value = null, Type valueType = null)
         {
@@ -186,17 +180,6 @@ namespace System.Windows.Forms
             base.Sizing = TreeViewColumnSizing.GrowOnly;
             _cellRenderer = renderer;
         }
-        private void TreeView_RowActivated(object o, RowActivatedArgs args)
-        {
-            if (args.Column.Handle == this.Handle)
-            {
-                if (args.Column.Cells[0] is CellRendererText cell)
-                {
-                    TreePath path = args.Path;
-                    _gridview.CellValueChanagedHandler(this.Index, path.Indices.Last());
-                }
-            }
-        }
         internal override DataGridViewCell NewCell(object value = null, Type valueType = null)
         {
             DataGridViewButtonCell newcell = new DataGridViewButtonCell();
@@ -217,9 +200,8 @@ namespace System.Windows.Forms
             var renderer = new CellRendererPixbufValue(this);
             //renderer.IconName = "face-smile";
             renderer.Height = RowHeight;
+            renderer.Editable = false;
             base.PackStart(renderer, false);
-            base.SortMode = DataGridViewColumnSortMode.NotSortable;
-            base.Sizing = TreeViewColumnSizing.GrowOnly;
             _cellRenderer = renderer;
         }
         internal override DataGridViewCell NewCell(object value = null, Type valueType = null)
@@ -256,6 +238,9 @@ namespace System.Windows.Forms
         internal Gtk.TreeView _treeView;
         internal DataGridView _gridview;
         internal ICellRenderer _cellRenderer;
+        internal string _cellEditablePath;
+        internal bool _cellEditing;
+        public ICellEditable CellEditable;
         protected DataGridViewColumn(int column, DataGridView ownerGridView, DataGridViewCell cellTemplate) : base()
         {
             if (ownerGridView != null)
@@ -264,6 +249,8 @@ namespace System.Windows.Forms
                 _treeView = ownerGridView.GridView;
             }
             _cellTemplate = cellTemplate;
+            base.Resizable = true;
+            base.Sizing = TreeViewColumnSizing.GrowOnly;
         }
         public DataGridViewColumn(DataGridView ownerGridView) : this(ownerGridView, new DataGridViewTextBoxCell())
         {
@@ -282,71 +269,225 @@ namespace System.Windows.Forms
             renderer.Editable = true;
             renderer.Mode = CellRendererMode.Editable;
             renderer.Edited += Renderer_Edited;
-            renderer.PlaceholderText = "---";
+            renderer.EditingStarted += Renderer_EditingStarted;
+            renderer.PlaceholderText = "";
             renderer.Height = RowHeight;
             base.PackStart(renderer, true);
-            base.Sizing = TreeViewColumnSizing.GrowOnly;
-            _cellRenderer = renderer as ICellRenderer;
+            _cellRenderer = renderer as ICellRenderer; 
         }
+
+        private void Renderer_EditingStarted(object o, EditingStartedArgs args)
+        {
+            _cellEditing = true;
+            _cellEditablePath = args.Path;
+            CellEditable = args.Editable;
+        }
+        public void EditableEditingDone()
+        {
+            if (CellEditable != null)
+            {
+                try
+                {
+                    CellEditable.EditingDone += Editable_EditingDone;
+                    CellEditable.FinishEditing();
+                    CellEditable.EditingDone -= Editable_EditingDone;
+                }
+                catch { }
+                finally {
+                    CellEditable?.RemoveWidget();
+                    CellEditable = null;
+                    _cellEditing = false;
+                }
+            }
+        }
+        private void Editable_EditingDone(object sender, EventArgs e)
+        {
+            if (_cellEditing == true)
+            {
+                if (sender is Gtk.Entry enry)
+                {
+                    RendererEdited(_cellEditablePath, enry.Text);
+                }
+                else if (sender is Gtk.ComboBox com)
+                {
+                    RendererEdited(_cellEditablePath, com.Entry.Text);
+                }
+            }
+        }
+
         private void Renderer_Edited(object o, EditedArgs args)
         {
-            TreePath path = new TreePath(args.Path);
+            RendererEdited(args.Path, args.NewText);
+        }
+        public void RendererEdited(string treepath, string value)
+        {
+            _cellEditing = false;
+            TreePath path = new TreePath(treepath);
             var model = _treeView.Model;
             model.GetIter(out TreeIter iter, path);
-            object cell = model.GetValue(iter, this.Index);
-            if (cell is DataGridViewCell val)
+            object row = model.GetValue(iter, 0);
+            if (row is DataGridViewRow val)
             {
-                val.Value = args.NewText;
-                _gridview.CellValueChanagedHandler(this.Index, path.Indices.Last());
+                val.Cells[Index].Value = value;
+                _gridview.CellValueChanagedHandler(Index, iter, path);
             }
+            this.QueueResize();
         }
         internal virtual DataGridViewCell NewCell(object value = null, Type valueType = null)
         {
             DataGridViewTextBoxCell newcell = new DataGridViewTextBoxCell();
             AtrributesClone(newcell);
             newcell.Value = value;
-            newcell.ValueType = valueType;
+            newcell.ValueType = valueType ?? typeof(string);
             return newcell;
         }
         internal void AtrributesClone(DataGridViewCell newcell)
         {
             newcell.Style = _cellTemplate.Style?.Clone();
+            newcell.OwningRow = _cellTemplate.OwningRow;
             newcell.ReadOnly = _cellTemplate.ReadOnly;
         }
-        public void SetGridViewDefaultStyle(DataGridViewCellStyle cellStyle)
+        public void SetDefaultStyle(DataGridViewCellStyle cellStyle)
         {
             if (cellStyle != null)
             {
                 if (cellStyle.WrapMode == DataGridViewTriState.True)
                 {
                     _cellRenderer.WrapMode = Pango.WrapMode.WordChar;
-                    _cellRenderer.WrapWidth = 0;
-                    _cellRenderer.WidthChars = 0;
+                    _cellRenderer.WrapWidth = Width;
                 }
             }
+        }
+        Gtk.CssProvider css = new Gtk.CssProvider();
+        public void UpdateDefaultStyle()
+        {
             if (_gridview != null)
             {
-                if (_gridview.AutoSizeRowsMode == DataGridViewAutoSizeRowsMode.AllCells || _gridview.AutoSizeRowsMode == DataGridViewAutoSizeRowsMode.DisplayedCells || _gridview.RowTemplate.Resizable == DataGridViewTriState.True)
+                if (_ReadOnly || _gridview.ReadOnly)
                 {
-                    
+                    _cellRenderer.Editable = false;
+                    _cellRenderer.Activatable = false;
+                }
+                else
+                {
+                    _cellRenderer.Editable = true;
+                    _cellRenderer.Activatable = true;
+                }
+                if (_gridview.AutoSizeRowsMode == DataGridViewAutoSizeRowsMode.AllCells || _gridview.AutoSizeRowsMode == DataGridViewAutoSizeRowsMode.DisplayedCells || _gridview.AutoSizeRowsMode == DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders || _gridview.AutoSizeRowsMode == DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders)
+                {
+                    _cellRenderer.Height = -1;
                 }
                 else
                 {
                     _cellRenderer.Height = RowHeight;
                 }
-            }
-        }
-        private int DefaultHeight
-        {
-            get
-            {
-                if (_treeView !=null)
+                if (_gridview.DefaultCellStyle != null && _gridview.DefaultCellStyle.WrapMode == DataGridViewTriState.True)
                 {
-                    double size = _treeView.PangoContext.FontDescription.Size / Pango.Scale.PangoScale;
-                    return (int)size + 16;
+                    _cellRenderer.WrapMode = Pango.WrapMode.WordChar;
+                    _cellRenderer.WrapWidth = Width;
                 }
-                return 28;
+                if (_gridview.GridView.IsRealized)
+                    this.QueueResize();
+
+                DataGridViewCellStyle _cellStyle = this.DefaultCellStyle;
+                if (_cellStyle == null && _gridview.ColumnHeadersDefaultCellStyle != null)
+                    _cellStyle = _gridview.ColumnHeadersDefaultCellStyle;
+
+                if (_cellStyle != null)
+                {
+                    Gtk.Button header = ((Gtk.Button)this.Button);
+                    StringBuilder style = new StringBuilder();
+                    if (_cellStyle.BackColor.Name != "0")
+                    {
+                        Color backColor = _cellStyle.BackColor;
+                        string color = $"rgba({backColor.R},{backColor.G},{backColor.B},{backColor.A})";
+                        style.AppendFormat("background-color:{0};background:{0};", color);
+                    }
+
+                    if (_cellStyle.ForeColor.Name != "0")
+                    {
+                        Color foreColor = _cellStyle.ForeColor;
+                        string color = $"rgba({foreColor.R},{foreColor.G},{foreColor.B},{foreColor.A})";
+                        style.AppendFormat("color:{0};", color);
+                    }
+                    if (_cellStyle.Font != null)
+                    {
+                        Font font = _cellStyle.Font;
+                        if (font.Unit == GraphicsUnit.Pixel)
+                            style.AppendFormat("font-size:{0}px;", font.Size);
+                        else if (font.Unit == GraphicsUnit.Inch)
+                            style.AppendFormat("font-size:{0}in;", font.Size);
+                        else if (font.Unit == GraphicsUnit.Point)
+                            style.AppendFormat("font-size:{0}pt;", font.Size);
+                        else if (font.Unit == GraphicsUnit.Millimeter)
+                            style.AppendFormat("font-size:{0}mm;", font.Size);
+                        else if (font.Unit == GraphicsUnit.Document)
+                            style.AppendFormat("font-size:{0}cm;", font.Size);
+                        else if (font.Unit == GraphicsUnit.Display)
+                            style.AppendFormat("font-size:{0}pc;", font.Size);
+                        else
+                            style.AppendFormat("font-size:{0}pt;", font.Size);
+
+                        if (string.IsNullOrWhiteSpace(font.FontFamily?.Name) == false)
+                        {
+                            style.AppendFormat("font-family:\"{0}\";", font.FontFamily.Name);
+                        }
+                        if (font.Bold)
+                        {
+                            style.Append("font-weight:bold;");
+                        }
+                        if (font.Italic)
+                        {
+                            style.Append("font-style:italic;");
+                        }
+                        if (font.Underline)
+                        {
+                            style.Append("text-decoration:underline;");
+                        }
+                        if (font.Strikeout)
+                        {
+                            style.Append("text-decoration:line-through;");
+                        }
+                    }
+
+                    if (style.Length > 9)
+                    {
+                        css.LoadFromData($".columnheadercell{{{style.ToString()}}}");
+                        if (header.StyleContext.HasClass("columnheadercell"))
+                        {
+                            header.StyleContext.RemoveClass("columnheadercell");
+                            header.StyleContext.RemoveProvider(css);
+                        }
+                        header.StyleContext.AddProvider(css, StyleProviderPriority.User);
+                        header.StyleContext.AddClass("columnheadercell");
+                    }
+                    switch (_cellStyle.Alignment)
+                    {
+                        case DataGridViewContentAlignment.TopLeft:
+                        case DataGridViewContentAlignment.MiddleLeft:
+                        case DataGridViewContentAlignment.BottomLeft:
+                            this.Alignment = 0f;
+                            break;
+
+                        case DataGridViewContentAlignment.TopCenter:
+                        case DataGridViewContentAlignment.MiddleCenter:
+                        case DataGridViewContentAlignment.BottomCenter:
+                            this.Alignment = 0.5f;
+                            break;
+
+                        case DataGridViewContentAlignment.TopRight:
+                        case DataGridViewContentAlignment.MiddleRight:
+                        case DataGridViewContentAlignment.BottomRight:
+                            this.Alignment = 1.0f;
+                            break;
+
+                        default:
+                            this.Alignment = 0f;
+                            break;
+                    }
+                }
             }
+            SetDefaultStyle(this.DefaultCellStyle);
         }
         public int RowHeight
         {
@@ -356,7 +497,7 @@ namespace System.Windows.Forms
                 {
                     return _gridview.RowTemplate.Height;
                 }
-                return DefaultHeight;
+                return 28;
             }
         }
         public DataGridView DataGridView { get { return _gridview; } set { _gridview = value; _treeView = value.GridView; } }
@@ -364,25 +505,20 @@ namespace System.Windows.Forms
         public string Markup { get => _markup; set { _markup = value; _cellRenderer.Markup = value; } }
 
         public DataGridViewElementStates State { get { return DataGridViewElementStates.None; } internal set { } }
-        [DefaultValue("")]
         public string HeaderText { get { return this.Title; } set { this.Title = value; } }
-        private int _DisplayIndex;
-        [Browsable(false)]
-        public int DisplayIndex { get => _DisplayIndex; set { _DisplayIndex = value; } }
-        [Localizable(true)]
-        [RefreshProperties(RefreshProperties.Repaint)]
-        public new int Width { get { return base.FixedWidth; } set { base.FixedWidth = value; } }
-
-        //[DefaultValue(true)]
-        //[Localizable(true)]
-        //public bool Visible { get; set; }
-        [Browsable(false)]
-        [DefaultValue(null)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int DisplayIndex
+        {
+            get => Array.IndexOf(_treeView.Columns, (TreeViewColumn)this);
+            set
+            {
+                if (_gridview != null && value >= 0 &&_gridview.Columns.Count > value && this.Handle != _treeView.Columns[value].Handle)
+                {
+                    _treeView.MoveColumnAfter((TreeViewColumn)this, _treeView.Columns[value]);
+                }
+            }
+        }
+        public new int Width { get { return base.FixedWidth; } set { base.FixedWidth = value; _cellRenderer.WidthChars = value; } }
         public Type ValueType { get; set; } = typeof(string);
-        [DefaultValue("")]
-        [Localizable(true)]
-
         public string ToolTipText { get; set; }
         private DataGridViewColumnSortMode _SortMode = DataGridViewColumnSortMode.Automatic;
         public DataGridViewColumnSortMode SortMode
@@ -397,8 +533,6 @@ namespace System.Windows.Forms
                     base.SortColumnId = _index;
             }
         }
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ISite Site { get; set; }
         public new DataGridViewTriState Resizable {
             get { return base.Resizable == true ? DataGridViewTriState.True : DataGridViewTriState.False; } 
@@ -414,66 +548,29 @@ namespace System.Windows.Forms
                 _cellRenderer.Activatable = !_ReadOnly;
             }
         }
-        [DefaultValue("")]
         public string Name { get => base.Button.Name; set { base.Button.Name = value; } }
-        [DefaultValue(5)]
-        [Localizable(true)]
-        [RefreshProperties(RefreshProperties.Repaint)]
-
         public int MinimumWidth { get => base.MinWidth; set { base.MinWidth = value; } }
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsDataBound { get; }
-        [Browsable(false)]
         public DataGridViewCellStyle InheritedStyle { get; }
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public DataGridViewAutoSizeColumnMode InheritedAutoSizeMode { get; }
-
-
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DataGridViewColumnHeaderCell HeaderCell { get; set; }
-        [DefaultValue(false)]
-        [RefreshProperties(RefreshProperties.All)]
-
         public bool Frozen { get; set; }
-        [DefaultValue(100)]
-
-        public float FillWeight { get; set; }
-        [DefaultValue(0)]
-
+        public float FillWeight { get; set; } = 100;
         public int DividerWidth { get; set; }
 
         private DataGridViewCellStyle _DefaultCellStyle;
-        [Browsable(true)]
         public DataGridViewCellStyle DefaultCellStyle { 
             get=> _DefaultCellStyle; 
-            set { _DefaultCellStyle = value; _cellRenderer.ColumnStyle = value; }
+            set { _DefaultCellStyle = value; _cellRenderer.ColumnStyle = value; SetDefaultStyle(_DefaultCellStyle); }
         }
         private string _DataPropertyName = string.Empty;
-        [Browsable(true)]
-        [DefaultValue("")]
         public string DataPropertyName { get => _DataPropertyName; set => _DataPropertyName = value; }
-        [DefaultValue(null)]
-
         public ContextMenuStrip ContextMenuStrip { get; set; }
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public virtual Type CellType { get { return _cellTemplate.GetType(); } }
-        [Browsable(false)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public virtual DataGridViewCell CellTemplate {
             get => _cellTemplate;
             set => _cellTemplate = value;
         }
-
-
-        [DefaultValue(DataGridViewAutoSizeColumnMode.NotSet)]
-        [RefreshProperties(RefreshProperties.Repaint)]
-
         public DataGridViewAutoSizeColumnMode AutoSizeMode { 
             get=> _AutoSizeMode; 
             set {
@@ -481,9 +578,6 @@ namespace System.Windows.Forms
             }
         }
         private DataGridViewAutoSizeColumnMode _AutoSizeMode;
-
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public event EventHandler Disposed;
 
         public object Clone()
@@ -494,16 +588,19 @@ namespace System.Windows.Forms
         {
             return RowHeight;
         }
-        public override string ToString() { return this.GetType().Name; }
-        //protected override void Dispose(bool disposing) {  }
-        private int _index;
+        private int _index = -1;
         public int Index
         {
             get => _index;
             internal set
             {
-                _index = value; if (_SortMode != DataGridViewColumnSortMode.NotSortable) { base.SortColumnId = value; }
-                foreach (var cell in base.Cells) { base.AddAttribute(cell, "cellvalue", _index); }
+                if (_index == -1)
+                    base.AddAttribute(base.Cells[0], "cellvalue", 0);
+                _index = value;
+                if (_SortMode != DataGridViewColumnSortMode.NotSortable)
+                {
+                    base.SortColumnId = _index;
+                }
             }
         }
     }

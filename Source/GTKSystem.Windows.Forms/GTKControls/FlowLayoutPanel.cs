@@ -11,34 +11,45 @@ using System.ComponentModel;
 
 namespace System.Windows.Forms
 {
-	[ProvideProperty("FlowBreak", typeof(Control))]
+    [ProvideProperty("FlowBreak", typeof(Control))]
 	[DefaultProperty("FlowDirection")]
     [DesignerCategory("Component")]
-    public partial class FlowLayoutPanel : Control, IExtenderProvider
+    public partial class FlowLayoutPanel : Panel, IExtenderProvider
     {
-        public readonly FlowLayoutPanelBase self = new FlowLayoutPanelBase();
-        public override object GtkControl => self;
+        public FlowLayoutPanelBase layoutEngine = new FlowLayoutPanelBase();
         private ObjectCollection _controls;
-        public FlowLayoutPanel() : base()
+        public FlowLayoutPanel() : base("FlowLayoutPanel")
         {
-            self.Orientation = Gtk.Orientation.Horizontal;
-            self.Halign = Align.Start;
-            self.Valign = Align.Start;
-            self.MinChildrenPerLine = 1;
-            self.MaxChildrenPerLine = 999;
-            self.ColumnSpacing = 0;
-            self.BorderWidth = 0;
-            _controls = new ObjectCollection(this);
+            self.Override.sender = this;
+            layoutEngine.Orientation = Gtk.Orientation.Horizontal;
+            layoutEngine.MinChildrenPerLine = 1;
+            layoutEngine.MaxChildrenPerLine = 30;
+            layoutEngine.ColumnSpacing = 1;
+            layoutEngine.Halign = Align.Fill;
+            layoutEngine.Valign = Align.Start;
+            _controls = new ObjectCollection(this, layoutEngine);
+            self.Remove(self.contaner);
+            self.contaner.Destroy();
+            self.Add(layoutEngine);
         }
 
-        private FlowDirection _FlowDirection;
+        private FlowDirection _FlowDirection = FlowDirection.LeftToRight;
 		public FlowDirection FlowDirection
 		{
             get { return _FlowDirection; }
             set
             {
-                if (value == FlowDirection.LeftToRight || value == FlowDirection.RightToLeft) { self.Orientation = Gtk.Orientation.Horizontal; }
-                else if (value == FlowDirection.TopDown || value == FlowDirection.BottomUp) { self.Orientation = Gtk.Orientation.Vertical; }
+                _FlowDirection = value;
+                if (value == FlowDirection.LeftToRight || value == FlowDirection.RightToLeft) { 
+                    layoutEngine.Orientation = Gtk.Orientation.Horizontal;
+                    layoutEngine.Halign = Align.Fill;
+                    layoutEngine.Valign = Align.Start;
+                }
+                else if (value == FlowDirection.TopDown || value == FlowDirection.BottomUp) { 
+                    layoutEngine.Orientation = Gtk.Orientation.Vertical;
+                    layoutEngine.Halign = Align.Start;
+                    layoutEngine.Valign = Align.Fill;
+                }
             }
         }
 
@@ -56,31 +67,40 @@ namespace System.Windows.Forms
         public override ControlCollection Controls => _controls;
         public bool CanExtend(object extendee)
         {
-            return true;
+            return false;
         }
         public class ObjectCollection : ControlCollection
         {
             private FlowLayoutPanel _owner;
-            public ObjectCollection(FlowLayoutPanel owner) : base(owner)
+            private FlowLayoutPanelBase LayoutEngine;
+            public ObjectCollection(FlowLayoutPanel owner, FlowLayoutPanelBase container) : base(owner, container)
             {
                 _owner = owner;
+                LayoutEngine = container;
             }
             public override void Add(Control control)
             {
-                Gtk.FlowBoxChild box = new FlowBoxChild();
-                box.Valign = Align.Start;
-                box.Halign = Align.Start;
-                box.Expand = false;
+                Gtk.FlowBoxChild item = new FlowBoxChild();
+                item.Valign = Align.Start;
+                item.Halign = Align.Start;
+                item.Add(control.Widget);
+                LayoutEngine.Add(item);
+
                 control.Location=new Drawing.Point(0, 0);
                 control.LockLocation = true;
                 control.Parent = _owner;
-                Gtk.Widget widg = control.Widget;
-                widg.Valign = Align.Start;
-                widg.Halign = Align.Start;
-                widg.Expand = false;
-                box.Add(widg);
-                _owner.self.Add(box);
-                base.AddWidget(box, control);
+                base.Add(control);
+
+            }
+            public override void Remove(Control control)
+            {
+                if (control is null)
+                {
+                    return;
+                }
+                if (control.Widget.Parent != null)
+                    LayoutEngine.Remove(control.Widget.Parent);
+                InnerList.Remove(control);
             }
         }
     }

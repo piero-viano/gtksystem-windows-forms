@@ -12,11 +12,17 @@ namespace GTKWinFormsApp
             this.Shown += Form4_Shown;
 
             button4.Click += Button4_Click;
+            button10.Click += Button10_Click;
+        }
+
+        private void Button10_Click(object? sender, EventArgs e)
+        {
+      
         }
 
         private void Button4_Click(object sender, EventArgs e)
         {
-
+ 
         }
 
         Point panel1Location = new Point();
@@ -28,7 +34,7 @@ namespace GTKWinFormsApp
         private void button3_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "图像文件|*.jpg;*.png|图像文件2|*.bmp";
+            //ofd.Filter = "图像文件|*.jpg;bang.png1|图像文件2|*.bmp";
             ofd.Multiselect = true;
             ofd.Title = "测试打开文件";
             ofd.DefaultExt = "*.png";
@@ -88,16 +94,6 @@ namespace GTKWinFormsApp
         {
             MessageBox.Show("test message test message test messagetest message test message test message test messagetest message test message test message test messagetest message test message test message test messagetest message test message test message test messagetest message", "疑问", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             MessageBox.Show("test message test message \ntest messagetest message", "警告", MessageBoxButtons.RetryCancel, MessageBoxIcon.Warning);
-        }
-
-        private void vScrollBar1_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void hScrollBar1_ValueChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

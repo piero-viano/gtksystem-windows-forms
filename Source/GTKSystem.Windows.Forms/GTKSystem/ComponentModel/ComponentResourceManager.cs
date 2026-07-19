@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Globalization;
 
@@ -14,10 +15,12 @@ namespace GTKSystem.ComponentModel
     {
         private Type formtype;
         private string formName;
-        public ComponentResourceManager(Type form) : base(form)
+        private GTKSystem.Resources.ResourceManager resource;
+        public ComponentResourceManager([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type form) : base(form)
         {
             formtype = form;
             formName = form.Name;
+            resource = new GTKSystem.Resources.ResourceManager(formtype.FullName, formtype.Assembly);
         }
 
         public override object GetObject(string name, CultureInfo culture)
@@ -26,13 +29,11 @@ namespace GTKSystem.ComponentModel
         }
         public override object GetObject(string name)
         {
-            GTKSystem.Resources.ResourceManager temp = new GTKSystem.Resources.ResourceManager(formtype.FullName, formtype.Assembly);
-            return temp.GetObject(name);
+            return resource.GetObject(name);
         }
         public override string GetString(string name)
         {
-            GTKSystem.Resources.ResourceManager temp = new GTKSystem.Resources.ResourceManager(formtype.FullName, formtype.Assembly);
-            return temp.GetString(name);
+            return resource.GetString(name);
         }
     }
 
