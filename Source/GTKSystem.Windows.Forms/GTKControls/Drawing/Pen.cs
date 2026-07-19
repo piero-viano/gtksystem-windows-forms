@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Drawing.Drawing2D;
 
 namespace System.Drawing
@@ -210,11 +210,6 @@ namespace System.Drawing
 
 		/// <summary>Releases all resources used by this <see cref="T:System.Drawing.Pen" />.</summary>
 		public void Dispose()
-		{
-		}
-
-		/// <summary>Allows an object to try to free resources and perform other cleanup operations before it is reclaimed by garbage collection.</summary>
-		~Pen()
 		{
 		}
 

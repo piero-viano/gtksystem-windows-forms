@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Reflection;
 
 namespace System.Drawing.Drawing2D
@@ -98,11 +98,6 @@ namespace System.Drawing.Drawing2D
 		/// <param name="disposing">
 		///   <see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
 		protected virtual void Dispose(bool disposing)
-		{
-		}
-
-		/// <summary>Allows an <see cref="T:System.Drawing.Drawing2D.CustomLineCap" /> to attempt to free resources and perform other cleanup operations before the <see cref="T:System.Drawing.Drawing2D.CustomLineCap" /> is reclaimed by garbage collection.</summary>
-		~CustomLineCap()
 		{
 		}
 

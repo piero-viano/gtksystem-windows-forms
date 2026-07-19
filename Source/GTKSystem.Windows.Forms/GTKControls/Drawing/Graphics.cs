@@ -1462,10 +1462,6 @@ namespace System.Drawing
         {
         }
 
-        ~Graphics()
-        {
-        }
-
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public static Graphics FromHdc(IntPtr hdc)
         {

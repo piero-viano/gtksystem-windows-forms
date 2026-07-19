@@ -1,4 +1,4 @@
-namespace System.Drawing
+﻿namespace System.Drawing
 {
 	/// <summary>Defines objects used to fill the interiors of graphical shapes such as rectangles, ellipses, pies, polygons, and paths.</summary>
 	public abstract class Brush : MarshalByRefObject, ICloneable, IDisposable
@@ -21,11 +21,6 @@ namespace System.Drawing
 		/// <param name="disposing">
 		///   <see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
 		protected virtual void Dispose(bool disposing)
-		{
-		}
-
-		/// <summary>Allows an object to try to free resources and perform other cleanup operations before it is reclaimed by garbage collection.</summary>
-		~Brush()
 		{
 		}
 
