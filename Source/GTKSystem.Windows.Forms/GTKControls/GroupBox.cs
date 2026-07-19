@@ -4,10 +4,11 @@
  * 技术支持438865652@qq.com，https://www.gtkapp.com, https://gitee.com/easywebfactory, https://github.com/easywebfactory
  * author:chenhongjin
  */
-using Cairo;
+
 using Gtk;
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.ComponentModel;
+using System.Drawing;
 
 namespace System.Windows.Forms
 {
@@ -16,19 +17,25 @@ namespace System.Windows.Forms
     {
         public readonly GroupBoxBase self = new GroupBoxBase();
         public override object GtkControl => self;
-        private Gtk.Overlay contaner = new Gtk.Overlay();
         private ControlCollection _controls = null;
         public GroupBox() : base()
         {
-            _controls = new ControlCollection(this, contaner);
-            _controls.Offset.Offset(0, -20);
-            contaner.MarginStart = 0;
-            contaner.MarginTop = 0;
-            contaner.Halign = Align.Fill;
-            contaner.Valign = Align.Fill;
-            contaner.Add(new Gtk.Fixed() { Halign = Align.Fill, Valign = Align.Fill });
-            self.Child = contaner;
+            self.Override.sender = this;
+            _controls = new ControlCollection(this, self.contaner);
         }
+
+        public override Size Size
+        {
+            get => base.Size;
+            set
+            {
+                base.Size = value;
+                self.contaner.WidthRequest = Math.Max(1, value.Width - self.fixedcontaner.MarginStart - self.fixedcontaner.MarginEnd);
+                self.contaner.HeightRequest = Math.Max(1, value.Height - self.fixedcontaner.MarginTop - self.fixedcontaner.MarginBottom);
+                self.fixedcontaner.Vadjustment.Value = 20;
+            }
+        }
+
         public override string Text { get { return self.Label; } set { self.Label = value; } }
         public override ControlCollection Controls => _controls;
         public override Padding Padding
@@ -37,10 +44,10 @@ namespace System.Windows.Forms
             set
             {
                 base.Padding = value;
-                contaner.MarginStart = value.Left;
-                contaner.MarginTop = value.Top;
-                contaner.MarginEnd = value.Right;
-                contaner.MarginBottom = value.Bottom;
+                self.fixedcontaner.MarginStart = value.Left;
+                self.fixedcontaner.MarginTop = value.Top;
+                self.fixedcontaner.MarginEnd = value.Right;
+                self.fixedcontaner.MarginBottom = value.Bottom;
             }
         }
         public override void SuspendLayout()

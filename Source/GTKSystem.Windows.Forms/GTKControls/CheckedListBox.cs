@@ -5,6 +5,7 @@
  * author:chenhongjin
  */
 
+using Gtk;
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.Collections;
 using System.ComponentModel;
@@ -21,24 +22,20 @@ namespace System.Windows.Forms
         private ObjectCollection _items;
         public CheckedListBox() : base()
         {
+            self.Override.sender = this;
             _items = new ObjectCollection(this);
             _flow.Orientation = Gtk.Orientation.Horizontal;
             _flow.MinChildrenPerLine = 1;
-            _flow.MaxChildrenPerLine = 99999;
+            _flow.MaxChildrenPerLine = 30;
             _flow.Halign = Gtk.Align.Fill;
-            _flow.Valign = Gtk.Align.Fill;
+            _flow.Valign = Gtk.Align.Start;
             _flow.ChildActivated += Control_ChildActivated;
             self.AutoScroll = true;
             self.Add(_flow);
-            
             this.BorderStyle = BorderStyle.Fixed3D;
         }
         private void Control_ChildActivated(object o, Gtk.ChildActivatedArgs args)
         {
-            int rowIndex = args.Child.Index;
-            if (this.CheckOnClick == true)
-                args.Child.Child.SetProperty("active", new GLib.Value(true));
-
             if (SelectedIndexChanged != null)
                 SelectedIndexChanged(this, args);
             if (SelectedValueChanged != null)
@@ -48,15 +45,25 @@ namespace System.Windows.Forms
         }
 
         public int ColumnWidth { get; set; }
-        public bool MultiColumn { get { return _flow.Orientation == Gtk.Orientation.Vertical; } set { if (value == false) { _flow.Orientation = Gtk.Orientation.Horizontal; } else { _flow.Orientation = Gtk.Orientation.Vertical; } } }
+        public bool MultiColumn { get { return _flow.Orientation == Gtk.Orientation.Vertical; } set { 
+                if (value) {
+                    _flow.Orientation = Gtk.Orientation.Vertical;
+                    _flow.Halign = Gtk.Align.Start;
+                    _flow.Valign = Gtk.Align.Fill;
+                } else {
+                    _flow.Orientation = Gtk.Orientation.Horizontal;
+                    _flow.Halign = Gtk.Align.Fill;
+                    _flow.Valign = Gtk.Align.Start;
+                } 
+            } 
+        }
         public bool HorizontalScrollbar { get; set; }
         public bool FormattingEnabled { get; set; }
         public int ItemHeight { get; set; }
         public SelectionMode SelectionMode { get; set; }
         public void ClearSelected() {
-            foreach(Gtk.FlowBoxChild wi in _flow.Children) { 
-                Gtk.Widget box = ((Gtk.Box)wi.Child).Children[0];
-                if (box is Gtk.CheckButton check)
+            foreach(Gtk.FlowBoxChild wi in _flow.Children) {
+                if (wi.Child is Gtk.CheckButton check)
                 {
                     check.Active = false;
                 }
@@ -115,32 +122,58 @@ namespace System.Windows.Forms
         {
             checkbox.self.Toggled += (object sender, EventArgs e) =>
             {
-                Gtk.CheckButton box = (Gtk.CheckButton)sender;
-                Gtk.FlowBoxChild item = box.Parent as Gtk.FlowBoxChild;
+                Gtk.CheckButton checkButton = (Gtk.CheckButton)sender;
+                Gtk.FlowBoxChild item = checkButton.Parent as Gtk.FlowBoxChild;
                 if (this.ItemCheck != null)
                 {
-                    CheckBox checkBox = _items.GetCheckedListBoxItem(item.Index);
-                    this.ItemCheck(checkBox, new ItemCheckEventArgs(item.Index, box.Active == true ? CheckState.Checked : CheckState.Unchecked, box.Active == false ? CheckState.Checked : CheckState.Unchecked));
+                    this.ItemCheck(this, new ItemCheckEventArgs(item.Index, checkButton.Active == true ? CheckState.Checked : CheckState.Unchecked, checkButton.Active == false ? CheckState.Checked : CheckState.Unchecked));
                 }
             };
-            Gtk.FlowBoxChild boxitem = new Gtk.FlowBoxChild();
-            boxitem.HeightRequest = this.ItemHeight;
-            if (this.MultiColumn && this.ColumnWidth > 0)
+            checkbox.self.WidgetEvent += (object o, WidgetEventArgs args) =>
             {
-                boxitem.WidthRequest = this.ColumnWidth;
-            }
+                if (args.Event.Type is Gdk.EventType.ButtonRelease && args.Event is Gdk.EventButton event1 && event1.Button == 1)
+                {
+                    Gtk.CheckButton checkButton = (Gtk.CheckButton)o;
+                    Gtk.FlowBoxChild item = checkButton.Parent as Gtk.FlowBoxChild;
+                    if (item.IsSelected == false && this.CheckOnClick == false)
+                    {
+                        args.RetVal = true;
+                        _flow.SelectChild(item);
+                    }
+                }
+            };
+
+            checkbox.self.Visible = true;
+            Gtk.FlowBoxChild boxitem = new Gtk.FlowBoxChild();
             boxitem.Valign = Gtk.Align.Start;
             boxitem.Halign = Gtk.Align.Start;
             boxitem.TooltipText = checkbox.Text;
+            boxitem.Visible = true;
+            boxitem.Realized += Boxitem_Realized;
             boxitem.Add(checkbox.self);
             if (position < 0)
-            {
                 this._flow.Add(boxitem);
+            else
+                this._flow.Insert(boxitem, position);
+        }
+
+        private void Boxitem_Realized(object sender, EventArgs e)
+        {
+            Gtk.FlowBoxChild item = (Gtk.FlowBoxChild)sender;
+            if (this.ItemHeight > 0)
+                item.HeightRequest = this.ItemHeight;
+            if (this.MultiColumn && this.ColumnWidth > 0)
+            {
+                item.WidthRequest = this.ColumnWidth;
+                Gtk.CheckButton checkButton = (Gtk.CheckButton)item.Child; 
+                if(checkButton.Child is Gtk.Label label)
+                {
+                    label.WidthChars = this.ColumnWidth / 12;
+                    label.Ellipsize = Pango.EllipsizeMode.End;
+                }
             }
             else
-            {
-                this._flow.Insert(boxitem, position);
-            }
+                item.WidthRequest = this.Width;
         }
         internal void NativeRemove(int index)
         {
@@ -154,19 +187,21 @@ namespace System.Windows.Forms
         }
         public void SetItemChecked(int index, bool value)
         {
-            CheckBox item = _items.GetCheckedListBoxItem(index);
-            if (item != null)
+            if (_flow.Children.Length > index)
             {
-                item.Checked = value;
+                if (_flow.Children[index] is Gtk.FlowBoxChild child)
+                {
+                    CheckBox checkBox = (CheckBox)child.Child.Data["Control"];
+                    if (checkBox != null)
+                    {
+                        checkBox.Checked = value;
+                    }
+                }
             }
         }
         public void SetItemCheckState(int index, System.Windows.Forms.CheckState value)
         {
-            CheckBox item = _items.GetCheckedListBoxItem(index);
-            if (item != null)
-            {
-                item.Checked = value == System.Windows.Forms.CheckState.Checked;
-            }
+            SetItemChecked(index, System.Windows.Forms.CheckState.Checked == value);
         }
         public class ObjectCollection : ArrayList
         {
@@ -180,14 +215,6 @@ namespace System.Windows.Forms
                 get => ((CheckBox)base[index]).Text;
                 set => ((CheckBox)base[index]).Text = value?.ToString();
             }
-            public CheckBox GetCheckedListBoxItem(int index)
-            {
-                if (index < Count)
-                    return base[index] as CheckBox;
-                else
-                    return null;
-            }
-
             public override int Add(object value)
             {
                 return AddCore(value, false, -1);
@@ -200,8 +227,9 @@ namespace System.Windows.Forms
             public int AddCore(object item, bool isChecked, int position)
             {
                 CheckBox listBoxItem = new CheckBox();
-                listBoxItem.Text=item.ToString();
+                listBoxItem.Text = item.ToString();
                 listBoxItem.Checked = isChecked;
+                listBoxItem.Name = $"listBoxItem{Count}";
                 _owner.NativeAdd(listBoxItem, isChecked, position);
                 if (position < 0)
                 {
@@ -226,10 +254,24 @@ namespace System.Windows.Forms
             }
             public override void Remove(object obj)
             {
-                int index = base.IndexOf(obj);
-                if (index>-1)
+                if (obj is CheckBox)
                 {
-                    RemoveAt(index);
+                    int index = base.IndexOf(obj);
+                    if (index > -1)
+                    {
+                        RemoveAt(index);
+                    }
+                }
+                else
+                {
+                    int index = 0;
+                    foreach (CheckBox item in this)
+                    {
+                        if (item.Text == obj.ToString())
+                            RemoveAt(index);
+                        index++;
+                    }
+
                 }
             }
             public override void Clear()

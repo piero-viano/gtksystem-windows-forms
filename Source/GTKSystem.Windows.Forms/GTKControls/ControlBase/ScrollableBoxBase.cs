@@ -1,30 +1,26 @@
-﻿using Gdk;
-using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
 {
     public abstract class ScrollableBoxBase : Gtk.ScrolledWindow, IControlGtk, IScrollableBoxBase
     {
-        public event ScrollEventHandler Scroll;
+        public event System.Windows.Forms.ScrollEventHandler Scroll;
         public GtkControlOverride Override { get; set; }
         public ScrollableBoxBase() : base()
         {
             this.Override = new GtkControlOverride(this);
-            this.ShadowType = Gtk.ShadowType.None;
             this.BorderWidth = 1;
+            this.ShadowType = Gtk.ShadowType.None;
             this.Events = Gdk.EventMask.AllEventsMask;
             base.Halign = Gtk.Align.Start;
             base.Valign = Gtk.Align.Start;
             base.Hexpand = false;
             base.Vexpand = false;
-            base.VscrollbarPolicy = Gtk.PolicyType.External;
-            base.HscrollbarPolicy = Gtk.PolicyType.External;
-            base.OverlayScrolling = false;
+            base.VscrollbarPolicy = Gtk.PolicyType.Never;
+            base.HscrollbarPolicy = Gtk.PolicyType.Never;
             base.Hadjustment.ValueChanged += Hadjustment_ValueChanged;
             base.Vadjustment.ValueChanged += Vadjustment_ValueChanged;
         }
- 
         private void Vadjustment_ValueChanged(object sender, EventArgs e)
         {
             if (Scroll != null)
@@ -33,7 +29,6 @@ namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
                 Scroll(this, new System.Windows.Forms.ScrollEventArgs(ScrollEventType.ThumbTrack, (int)(adj.Value > adj.StepIncrement ? (adj.Value - adj.StepIncrement) : adj.Value), (int)adj.Value, ScrollOrientation.VerticalScroll));
             }
         }
-
         private void Hadjustment_ValueChanged(object sender, EventArgs e)
         {
             if (Scroll != null)
@@ -43,10 +38,6 @@ namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
             }
         }
 
-        public void AddClass(string cssClass)
-        {
-            this.Override.AddClass(cssClass);
-        }
         public bool VScroll { get; set; } = true;
         public bool HScroll { get; set; } = true;
         public virtual bool AutoScroll
@@ -63,25 +54,27 @@ namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
                 }
                 else
                 {
-                    base.VscrollbarPolicy = Gtk.PolicyType.External;
-                    base.HscrollbarPolicy = Gtk.PolicyType.External;
+                    base.VscrollbarPolicy = Gtk.PolicyType.Never;
+                    base.HscrollbarPolicy = Gtk.PolicyType.Never;
                 }
             }
         }
-        protected override void OnShown()
+        public Gtk.ScrolledWindow ScrolledWindow { get => this; }
+        public bool ScrollView(double hscrollValue, double vscrollValue)
         {
-            Override.OnAddClass();
-            base.OnShown();
-        }
-        protected virtual Gdk.Rectangle GetDrawRectangle()
-        {
-            return new Gdk.Rectangle(0, 0, this.AllocatedWidth, this.AllocatedHeight);
-        }
-        protected override bool OnDrawn(Cairo.Context cr)
-        {
-            Gdk.Rectangle rec = GetDrawRectangle();
-            Override.OnPaint(cr, rec);
-            return base.OnDrawn(cr);
+            bool res = false;
+            if (hscrollValue > -1 && base.HscrollbarPolicy != Gtk.PolicyType.Never && base.HscrollbarPolicy != Gtk.PolicyType.External)
+            {
+                res = true;
+                base.Hadjustment.Value = hscrollValue;
+            }
+            if (vscrollValue > -1 && base.VscrollbarPolicy != Gtk.PolicyType.Never && base.VscrollbarPolicy != Gtk.PolicyType.External)
+            {
+                res = true;
+                base.Vadjustment.Value = vscrollValue;
+            }
+
+            return res;
         }
     }
 }

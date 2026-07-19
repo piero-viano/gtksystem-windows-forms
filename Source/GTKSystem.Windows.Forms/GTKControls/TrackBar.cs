@@ -18,29 +18,33 @@ namespace System.Windows.Forms
         Gtk.Scale scale;
 		public TrackBar():base()
         {
-            self.Realized += Control_Realized;
+            self.Override.sender = this;
+            self.Realized += Self_Realized;
         }
-
-        private void Control_Realized(object sender, EventArgs e)
+        private bool Is_Self_Realized;
+        private void Self_Realized(object sender, EventArgs e)
         {
-            scale = new Gtk.Scale(Orientation== Orientation.Horizontal ? Gtk.Orientation.Horizontal : Gtk.Orientation.Vertical, adjustment);
-            scale.ShowFillLevel = true;
-            scale.DrawValue = false;
-            scale.RoundDigits = 1;
-            scale.Visible = true;
-            scale.Inverted = Orientation == Orientation.Vertical;
-            adjustment.Lower = Minimum;
-            adjustment.Upper = Maximum;
-            adjustment.Value = Value;
-            adjustment.ValueChanged += Control_ValueChanged;
-            self.Child = scale;
+            if (!Is_Self_Realized)
+            {
+                Is_Self_Realized = true;
+                scale = new Gtk.Scale(Orientation == Orientation.Horizontal ? Gtk.Orientation.Horizontal : Gtk.Orientation.Vertical, adjustment);
+                scale.ShowFillLevel = true;
+                scale.DrawValue = false;
+                scale.RoundDigits = 1;
+                scale.Visible = true;
+                scale.Inverted = Orientation == Orientation.Vertical;
+                adjustment.Lower = Minimum;
+                adjustment.Upper = Maximum;
+                adjustment.Value = Value;
+                adjustment.ValueChanged += Control_ValueChanged;
+                self.Child = scale;
+            }
         }
 
         private void Control_ValueChanged(object sender, EventArgs e)
         {
-            Value = (int)adjustment.Value;
-            if (Scroll != null)
-                Scroll(this, e);
+            ValueChanged?.Invoke(this, e);
+            Scroll?.Invoke(this, e);
         }
 
         public int LargeChange { get; set; } = 5;
@@ -51,5 +55,6 @@ namespace System.Windows.Forms
         public int TickFrequency { get; set; }
         public System.Windows.Forms.TickStyle TickStyle { get; set; }
         public event EventHandler Scroll;
+        public event EventHandler ValueChanged;
     }
 }

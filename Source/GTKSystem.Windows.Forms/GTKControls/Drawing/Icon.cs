@@ -1,4 +1,5 @@
 ﻿using Gdk;
+using GLib;
 using GTKSystem.Resources;
 using System.ComponentModel;
 using System.IO;
@@ -10,16 +11,68 @@ namespace System.Drawing
 	{
         #region 只取图像byte[]数据 
         private byte[] _PixbufData;
+        //¡°jpeg¡±, ¡°tiff¡±, ¡°png¡±, ¡°ico¡± or ¡°bmp¡±.
         public byte[] PixbufData
         {
-            get { if (_PixbufData == null && _Pixbuf != null) { _PixbufData = _Pixbuf.SaveToBuffer("bmp"); } return _PixbufData; }
-            set { _PixbufData = value; _Pixbuf = new Gdk.Pixbuf((byte[])value.Clone()); }
+            get
+            {
+                if (_PixbufData == null && _Pixbuf != null)
+                {
+                    try
+                    {
+                        _PixbufData = _Pixbuf.SaveToBuffer("png");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                return _PixbufData;
+            }
+            set
+            {
+                _PixbufData = value;
+                try
+                {
+                    _Pixbuf = new Gdk.Pixbuf(value);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
         }
         private Gdk.Pixbuf _Pixbuf;
         public Gdk.Pixbuf Pixbuf
         {
-            get { if (_Pixbuf == null && _PixbufData != null) { _Pixbuf = new Gdk.Pixbuf((byte[])_PixbufData.Clone()); } return _Pixbuf; }
-            set { _Pixbuf = value; _PixbufData = value.SaveToBuffer("bmp"); }
+            get
+            {
+                if (_Pixbuf == null && _PixbufData != null)
+                {
+                    try
+                    {
+                        _Pixbuf = new Gdk.Pixbuf(_PixbufData);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                return _Pixbuf;
+            }
+            set
+            {
+                _Pixbuf = value;
+
+                try
+                {
+                    _PixbufData = value.SaveToBuffer("png");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
         }
         public string FileName { get; set; }
         #endregion
@@ -56,7 +109,7 @@ namespace System.Drawing
 			get;
 			private set;
 		}
-        public Icon(byte[] bytes)
+        internal Icon(byte[] bytes)
         {
             if (bytes!=null)
             {
@@ -105,17 +158,17 @@ namespace System.Drawing
 		/// <exception cref="T:System.ArgumentException">The <paramref name="stream" /> parameter is <see langword="null" />.</exception>
 		public Icon(Stream stream, int width, int height)
         {
-            this.Width = width;
-            this.Height = height;
-            using(BinaryReader reader =new BinaryReader(stream))
+            stream.Position = 0;
+            using (BinaryReader reader =new BinaryReader(stream))
             {
                 byte[] bytes = reader.ReadBytes((int)stream.Length);
                 this.PixbufData = bytes;
-                this.Pixbuf = new Gdk.Pixbuf(bytes);
-                if (width < 1)
-                    this.Width = this.Pixbuf.Width;
-                if (height < 1)
-                    this.Height = this.Pixbuf.Height;
+                if (width > 0 && height > 0)
+                    this.Pixbuf = new Gdk.Pixbuf(bytes, width, height);
+                else
+                    this.Pixbuf = new Gdk.Pixbuf(bytes);
+                this.Width = this.Pixbuf.Width;
+                this.Height = this.Pixbuf.Height;
             }
         }
 
@@ -145,23 +198,10 @@ namespace System.Drawing
 			this.Height = height;
             if (System.IO.File.Exists(fileName))
             {
-                byte[] bytes = System.IO.File.ReadAllBytes(fileName);
-                this.PixbufData = bytes;
-                this.Pixbuf = new Gdk.Pixbuf(bytes);
-                if (width < 1)
-                    this.Width = this.Pixbuf.Width;
-                if (height < 1)
-                    this.Height = this.Pixbuf.Height;
-            }
-            else if (System.IO.File.Exists($"Resources\\{fileName}.ico"))
-            {
-                byte[] bytes = System.IO.File.ReadAllBytes($"Resources\\{fileName}.ico");
-                this.PixbufData = bytes;
-                this.Pixbuf = new Gdk.Pixbuf(bytes);
-                if (width < 1)
-                    this.Width = this.Pixbuf.Width;
-                if (height < 1)
-                    this.Height = this.Pixbuf.Height;
+                this.Pixbuf = new Gdk.Pixbuf(fileName);
+                this.Width = this.Pixbuf.Width;
+                this.Height = this.Pixbuf.Height;
+                this.PixbufData = this.Pixbuf.SaveToBuffer("png");
             }
         }
 
@@ -215,7 +255,7 @@ namespace System.Drawing
 				foreach(byte data in PixbufData)
                     outputStream.WriteByte(data);
             else if (Pixbuf != null)
-                foreach (byte data in Pixbuf.PixelBytes.Data)
+                foreach (byte data in Pixbuf.SaveToBuffer("png"))
                     outputStream.WriteByte(data);
             else if (FileName != null && System.IO.File.Exists(FileName))
                 foreach (byte data in System.IO.File.ReadAllBytes(FileName))

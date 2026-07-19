@@ -4,17 +4,16 @@
  * 技术支持438865652@qq.com，https://www.gtkapp.com, https://gitee.com/easywebfactory, https://github.com/easywebfactory
  * author:chenhongjin
  */
-using Atk;
+
 using Gdk;
 using GLib;
 using Gtk;
-using Pango;
-
 namespace System.Windows.Forms.GtkRender
 {
     public interface ICellRenderer
     {
-        DataGridViewCell CellValue { set; }
+        [Property("cellvalue")]
+        DataGridViewRow CellValue { set; }
         DataGridViewCellStyle ColumnStyle { set; }
         Pango.WrapMode WrapMode { get; set; }
         int WrapWidth { get; set; }
@@ -28,28 +27,27 @@ namespace System.Windows.Forms.GtkRender
 
     public class CellRendererValue : CellRendererText, ICellRenderer
     {
+        static CellRendererValue()
+        {
+            typeof(CellRendererValue).GetMembers();
+        }
+        int ColumnIndex;
         private DataGridViewColumn Column;
         private CellReandererUtility utility;
         public CellRendererValue(DataGridViewColumn view)
         {
             Column = view;
+            ColumnIndex = view.Index;
             utility = new CellReandererUtility();
         }
         [Property("cellvalue")]
-        public DataGridViewCell CellValue
+        public DataGridViewRow CellValue
         {
             set
             {
-                if (value != null)
-                {
-                    DataGridViewCellStyle style = value.Style;
-                    if (style == null)
-                        style = ColumnStyle;
-                    if (style == null)
-                        style = value.InheritedStyle;
-
-                    utility.SetTextWithStyle(this, style, value.Value);
-                }
+                DataGridViewCell cell = value.Cells[Column.Index];
+                DataGridViewCellStyle style = utility.GetStyle(this.Column, cell);
+                utility.SetTextWithStyle(this, style, cell.Value);
             }
         }
         public DataGridViewCellStyle ColumnStyle { get; set; }
@@ -58,28 +56,28 @@ namespace System.Windows.Forms.GtkRender
     }
     public class CellRendererToggleValue : CellRendererToggle, ICellRenderer
     {
+        static CellRendererToggleValue()
+        {
+            typeof(CellRendererToggleValue).GetMembers();
+        }
+        int ColumnIndex;
         DataGridViewColumn Column;
         private CellReandererUtility utility;
         public CellRendererToggleValue(DataGridViewColumn view)
         {
             Column = view;
+            ColumnIndex = view.Index;
             utility = new CellReandererUtility();
         }
         [Property("cellvalue")]
-        public DataGridViewCell CellValue
+        public DataGridViewRow CellValue
         {
             set
             {
-                if (value != null)
-                {
-                    this.Active = (value.Value?.ToString() == "1" || value.Value?.ToString()?.ToLower() == "true");
-                    DataGridViewCellStyle style = value.Style;
-                    if (style == null)
-                        style = ColumnStyle;
-                    if (style == null)
-                        style = value.InheritedStyle;
-                    utility.SetControlWithStyle(this, style);
-                }
+                DataGridViewCell cell = value.Cells[Column.Index];
+                this.Active = (cell.Value?.ToString() == "True" || cell.Value?.ToString() == "true" || cell.Value?.ToString() == "1");
+                DataGridViewCellStyle style = utility.GetStyle(this.Column, cell);
+                utility.SetControlWithStyle(this, style);
             }
         }
         public DataGridViewCellStyle ColumnStyle { get; set; }
@@ -91,27 +89,27 @@ namespace System.Windows.Forms.GtkRender
     }
     public class CellRendererComboValue : CellRendererCombo, ICellRenderer
     {
+        static CellRendererComboValue()
+        {
+            typeof(CellRendererComboValue).GetMembers();
+        }
+        int ColumnIndex;
         DataGridViewColumn Column;
         private CellReandererUtility utility;
         public CellRendererComboValue(DataGridViewColumn view)
         {
             Column = view;
+            ColumnIndex = view.Index;
             utility = new CellReandererUtility();
         }
         [Property("cellvalue")]
-        public DataGridViewCell CellValue
+        public DataGridViewRow CellValue
         {
             set
             {
-                if (value != null)
-                {
-                    DataGridViewCellStyle style = value.Style;
-                    if (style == null)
-                        style = ColumnStyle;
-                    if (style == null)
-                        style = value.InheritedStyle;
-                    utility.SetTextWithStyle(this, style, value.Value);
-                }
+                DataGridViewCell cell = value.Cells[Column.Index];
+                DataGridViewCellStyle style = utility.GetStyle(this.Column, cell);
+                utility.SetTextWithStyle(this, style, cell.Value);
             }
         }
         public DataGridViewCellStyle ColumnStyle { get; set; }
@@ -120,39 +118,46 @@ namespace System.Windows.Forms.GtkRender
     }
     public class CellRendererPixbufValue : CellRendererPixbuf, ICellRenderer
     {
+        static CellRendererPixbufValue()
+        {
+            typeof(CellRendererPixbufValue).GetMembers();
+        }
+        int ColumnIndex;
         DataGridViewColumn Column;
         private CellReandererUtility utility;
         public CellRendererPixbufValue(DataGridViewColumn view)
         {
             Column = view;
+            ColumnIndex = view.Index;
             utility = new CellReandererUtility();
         }
         [Property("cellvalue")]
-        public DataGridViewCell CellValue
+        public DataGridViewRow CellValue
         {
             set
             {
-                if (value != null)
+                DataGridViewCell cell = value.Cells[Column.Index];
+                DataGridViewCellStyle style = utility.GetStyle(this.Column, cell);
+                utility.SetControlWithStyle(this, style);
+                if (cell.Value == null)
+                {
+                    this.IconName = "image-missing";
+                }
+                else
                 {
                     try
                     {
-                        DataGridViewCellStyle style = value.Style;
-                        if (style == null)
-                            style = ColumnStyle;
-                        if (style == null)
-                            style = value.InheritedStyle;
-                        utility.SetControlWithStyle(this, style);
-                        if (typeof(Drawing.Image).Equals(value.ValueType) || typeof(Drawing.Bitmap).Equals(value.ValueType))
+                        if (cell.Value is System.Drawing.Image)
                         {
-                            this.Pixbuf = ((Drawing.Image)value.Value).Pixbuf;
+                            this.Pixbuf = ((Drawing.Image)cell.Value).Pixbuf;
                         }
-                        else if (value.ValueType == typeof(byte[]))
+                        else if (cell.ValueType.IsArray)
                         {
-                            this.Pixbuf = new Pixbuf((byte[])value.Value);
+                            this.Pixbuf = new Pixbuf((byte[])cell.Value);
                         }
                         else
                         {
-                            this.Pixbuf = new Gdk.Pixbuf(value.Value.ToString().Replace("\\\\", "//").Replace("\\", "/"));
+                            this.Pixbuf = new Gdk.Pixbuf(cell.Value.ToString().Replace("\\\\", "//").Replace("\\", "/"));
                         }
                     }
                     catch
@@ -172,55 +177,73 @@ namespace System.Windows.Forms.GtkRender
     }
     public class CellRendererButtonValue : CellRendererText, ICellRenderer
     {
+        static CellRendererButtonValue()
+        {
+            typeof(CellRendererButtonValue).GetMembers();
+        }
+        int ColumnIndex;
         DataGridViewColumn Column;
         private CellReandererUtility utility;
         public CellRendererButtonValue(DataGridViewColumn view)
         {
             Column = view;
+            ColumnIndex = view.Index;
             utility = new CellReandererUtility();
             this.SetAlignment(0.5f, 0.5f);
             this.Ellipsize = Pango.EllipsizeMode.End;
+            this.Editable = false;
         }
         [Property("cellvalue")]
-        public DataGridViewCell CellValue
+        public DataGridViewRow CellValue
         {
             set
             {
-                if (value != null)
-                {
-                    DataGridViewCellStyle style = value.Style;
-                    if (style == null)
-                        style = ColumnStyle;
-                    if (style == null)
-                        style = value.InheritedStyle;
-                    utility.SetTextWithStyle(this, style, value.Value);
-                    base.SetAlignment(0.5f, 0.5f);
-                }
+                DataGridViewCell cell = value.Cells[Column.Index];
+                DataGridViewCellStyle style = utility.GetStyle(this.Column, cell);
+                utility.SetTextWithStyle(this, style, cell.Value);
+                base.SetAlignment(0.5f, 0.5f);
             }
         }
         public DataGridViewCellStyle ColumnStyle { get; set; }
         public bool Activatable { get; set; }
         string ICellRenderer.Markup { get; set; }
+        public new bool Editable { get; set; }
         protected override void OnRender(Cairo.Context cr, Widget widget, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, CellRendererState flags)
         {
-            widget.StyleContext.AddClass("GridViewCell-Button");
             widget.StyleContext.Save();
-            int height = cell_area.Height;
-            int y = cell_area.Y;
-            if (height > 36)
-            {
-                y = y + (cell_area.Height - 36) / 2;
-                height = 36;
-            }
-            widget.StyleContext.RenderFrame(cr, cell_area.X + 3, y, cell_area.Width - 6, height);
-            widget.StyleContext.RenderBackground(cr, cell_area.X + 3, y, cell_area.Width - 6, height);
+            widget.StyleContext.AddClass("GridViewCell-Button");
+            int areax = cell_area.X + 5;
+            int width = cell_area.Width - 10;
+            if (width < 1)
+                width = 1;
+            widget.StyleContext.RenderFrame(cr, areax, cell_area.Y, width, cell_area.Height);
+            widget.StyleContext.RenderBackground(cr, areax, cell_area.Y, width, cell_area.Height);
             widget.StyleContext.Restore();
-            base.OnRender(cr, widget, new Gdk.Rectangle(background_area.X, background_area.Y, background_area.Width, background_area.Height), new Gdk.Rectangle(cell_area.X, cell_area.Y, cell_area.Width, cell_area.Height), flags);
+            base.OnRender(cr, widget, background_area, new Gdk.Rectangle(areax, cell_area.Y, width, cell_area.Height), flags);
         }
     }
 
     public class CellReandererUtility
     {
+        internal DataGridViewCellStyle GetStyle(DataGridViewColumn col, DataGridViewCell cell)
+        {
+            DataGridViewCellStyle style = cell.Style;
+            if (style == null)
+                style = cell.RowStyle;
+
+            if (style == null)
+            {
+                if (cell.DataGridView.AlternatingRowsDefaultCellStyle != null && cell.OwningRow.Index % 2 == 1)
+                    style = cell.DataGridView.AlternatingRowsDefaultCellStyle;
+                else
+                    style = cell.DataGridView.RowsDefaultCellStyle;
+            }
+            if (style == null)
+            {
+                style = col.DefaultCellStyle ?? cell.DataGridView.DefaultCellStyle;
+            }
+            return style;
+        }
         internal void SetControlWithStyle(CellRenderer cell, DataGridViewCellStyle cellstyle)
         {
             if (cellstyle != null)
@@ -256,11 +279,10 @@ namespace System.Windows.Forms.GtkRender
         {
             if (cellstyle != null)
             {
-                if (cellstyle?.WrapMode == DataGridViewTriState.True)
+                if (cellstyle.WrapMode == DataGridViewTriState.True)
                 {
                     cell.WrapMode = Pango.WrapMode.WordChar;
-                    cell.WrapWidth = 0;
-                    cell.WidthChars = 0;
+                    cell.WrapWidth = cell.WidthChars;
                 }
                 if (cellstyle.ForeColor.Name != "0")
                     cell.ForegroundRgba = new Gdk.RGBA() { Alpha = cellstyle.ForeColor.A / 255f, Blue = cellstyle.ForeColor.B / 255f, Green = cellstyle.ForeColor.G / 255f, Red = cellstyle.ForeColor.R / 255f };
@@ -284,9 +306,6 @@ namespace System.Windows.Forms.GtkRender
                     cell.SetAlignment(0.5f, 1f);
                 else if (cellstyle.Alignment == DataGridViewContentAlignment.BottomRight)
                     cell.SetAlignment(1.0f, 1f);
-
-                if (cellstyle.WrapMode != DataGridViewTriState.NotSet)
-                    cell.WrapMode = cellstyle.WrapMode == DataGridViewTriState.True ? Pango.WrapMode.WordChar : Pango.WrapMode.Word;
             }
         }
         internal string GetFormatText(object text, DataGridViewCellStyle cellstyle)

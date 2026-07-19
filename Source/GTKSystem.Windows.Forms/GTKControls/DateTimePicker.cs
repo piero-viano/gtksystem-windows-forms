@@ -6,9 +6,11 @@
  */
 
 using Gtk;
+using GTKSystem.Windows.Forms.Resources;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace System.Windows.Forms
@@ -20,11 +22,12 @@ namespace System.Windows.Forms
         Gtk.Calendar calendar = new Gtk.Calendar();
         public DateTimePicker() : base("DateTimePicker")
         {
+            self.Override.sender = this;
             base.Mask = "____年__月__日";
 
             self.SecondaryIconActivatable = true;
             self.SecondaryIconStock= "open-menu";
-            self.SecondaryIconPixbuf = new Gdk.Pixbuf(this.GetType().Assembly, "GTKSystem.Windows.Forms.Resources.System.MonthCalendar.ico");
+            self.SecondaryIconPixbuf = new Gdk.Pixbuf(AssemblyResources.CurrentAssembly, AssemblyResources.ToSystemUri("MonthCalendar.ico"));
             self.IconRelease += DateTimePicker_IconRelease;
             self.Shown += Self_Shown;
 
@@ -32,7 +35,8 @@ namespace System.Windows.Forms
             popver.BorderWidth = 5;
             popver.Modal = true;
             popver.Position = PositionType.Bottom;
-
+            popver.ConstrainTo = PopoverConstraint.Window;
+            
             calendar.Halign = Gtk.Align.Fill;
             calendar.Valign = Gtk.Align.Fill;
             calendar.DaySelected += Calendar_DaySelected;

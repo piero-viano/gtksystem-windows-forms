@@ -6,6 +6,7 @@
  */
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.ComponentModel;
+using System.Drawing;
 
 namespace System.Windows.Forms
 {
@@ -15,20 +16,22 @@ namespace System.Windows.Forms
         public readonly RadioButtonBase self = new RadioButtonBase();
         public override object GtkControl => self;
         public RadioButton():base() {
+            self.Override.sender = this;
             self.ParentSet += Self_ParentSet;
         }
 
         private void Self_ParentSet(object o, Gtk.ParentSetArgs args)
         {
             Gtk.Container con = self.Parent as Gtk.Container;
-            foreach (var widget in con.Children)
+            if (con != null)
             {
-                if (widget is Gtk.RadioButton group)
+                foreach (var widget in con.Children)
                 {
-                    ((Gtk.RadioButton)o).Group = new Gtk.RadioButton[0];
-                    //加入容器内的第一个radio配组
-                    ((Gtk.RadioButton)o).JoinGroup(group);
-                     break;
+                    if (widget is Gtk.RadioButton group)
+                    {
+                        ((Gtk.RadioButton)o).JoinGroup(group);
+                        break;
+                    }
                 }
             }
             self.Active = _Checked;
@@ -43,7 +46,64 @@ namespace System.Windows.Forms
         public event EventHandler CheckedChanged;
 
         public override string Text { get { return self.Label; } set { self.Label = value;} }
-        public bool Checked { get { return self.Active; } set { _Checked = true; self.Active = true; } }
+        public bool Checked { get { return self.Active; } set { _Checked = value; self.Active = value; } }
         private bool _Checked;
+        public System.Drawing.ContentAlignment TextAlign
+        {
+            get { return textAlign; }
+            set
+            {
+                textAlign = value;
+                if (value == System.Drawing.ContentAlignment.TopLeft)
+                {
+                    self.Xalign = 0.0f;
+                    self.Yalign = 0.0f;
+                }
+                else if (value == System.Drawing.ContentAlignment.TopCenter)
+                {
+                    self.Xalign = 0.5f;
+                    self.Yalign = 0.0f;
+                }
+                else if (value == System.Drawing.ContentAlignment.TopRight)
+                {
+                    self.Xalign = 1.0f;
+                    self.Yalign = 0.0f;
+                }
+                else if (value == System.Drawing.ContentAlignment.MiddleLeft)
+                {
+                    self.Xalign = 0.0f;
+                    self.Yalign = 0.5f;
+                }
+                else if (value == System.Drawing.ContentAlignment.MiddleCenter)
+                {
+                    self.Xalign = 0.5f;
+                    self.Yalign = 0.5f;
+                }
+                else if (value == System.Drawing.ContentAlignment.MiddleRight)
+                {
+                    self.Xalign = 1.0f;
+                    self.Yalign = 0.5f;
+                }
+                else if (value == System.Drawing.ContentAlignment.BottomLeft)
+                {
+                    self.Xalign = 0.0f;
+                    self.Yalign = 1.0f;
+                }
+                else if (value == System.Drawing.ContentAlignment.BottomCenter)
+                {
+                    self.Xalign = 0.5f;
+                    self.Yalign = 1.0f;
+                }
+                else if (value == System.Drawing.ContentAlignment.BottomRight)
+                {
+                    self.Xalign = 1.0f;
+                    self.Yalign = 1.0f;
+                }
+
+            }
+        }
+        private System.Drawing.ContentAlignment textAlign;
+        public System.Windows.Forms.Appearance Appearance { get => self.DrawIndicator ? Appearance.Normal : Appearance.Button; set { self.DrawIndicator = value == Appearance.Normal; } }
+        public bool AutoEllipsis { get; set; }
     }
 }

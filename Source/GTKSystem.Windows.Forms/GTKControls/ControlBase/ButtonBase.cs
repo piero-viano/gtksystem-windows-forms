@@ -1,25 +1,36 @@
-﻿namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
+﻿using Gdk;
+
+namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
 {
     public sealed class ButtonBase: Gtk.Button, IControlGtk
     {
         public GtkControlOverride Override { get; set; }
-        public ButtonBase() : base(new Gtk.Label() { Wrap = true, SingleLineMode = false, LineWrap = true, LineWrapMode = Pango.WrapMode.WordChar })
+        public ButtonBase() : base(new Gtk.Label() { MaxWidthChars = 0, Wrap = false, Ellipsize =Pango.EllipsizeMode.End })
         {
             this.Override = new GtkControlOverride(this);
-            this.Override.AddClass("Button");
-            base.Valign = Gtk.Align.Start;
-            base.Halign = Gtk.Align.Start;
+            this.StyleContext.AddClass("Button");
+            this.Valign = Gtk.Align.Start;
+            this.Halign = Gtk.Align.Start;
+            this.Events |= EventMask.PointerMotionMask;
+            this.Events |= EventMask.ButtonMotionMask;
+            this.ButtonReleaseEvent += ButtonBase_ButtonReleaseEvent;
+            this.Drawn += ButtonBase_Drawn;
         }
-        protected override void OnShown()
+
+        private void ButtonBase_Drawn(object o, Gtk.DrawnArgs args)
         {
-            Override.OnAddClass();
-            base.OnShown();
+            Override.OnPaint(args.Cr);
         }
-        protected override bool OnDrawn(Cairo.Context cr)
+
+        private void ButtonBase_ButtonReleaseEvent(object o, Gtk.ButtonReleaseEventArgs args)
         {
-            Gdk.Rectangle rec = new Gdk.Rectangle(0, 0, this.AllocatedWidth, this.AllocatedHeight);
-            Override.OnPaint(cr, rec);
-            return base.OnDrawn(cr);
+            if (this.Toplevel is FormBase form)
+            {
+                ((System.Windows.Forms.Form)form.Data["Control"]).DialogResult = DialogResult;
+            }
         }
+
+        public System.Windows.Forms.DialogResult DialogResult { get; set; }
+        public string Text { get => ((Gtk.Label)Child).Text; set => ((Gtk.Label)Child).Text = value; }
     }
 }

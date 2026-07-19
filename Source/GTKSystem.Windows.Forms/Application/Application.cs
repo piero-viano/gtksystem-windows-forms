@@ -1,12 +1,8 @@
 ﻿using Gtk;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace System.Windows.Forms
@@ -17,43 +13,83 @@ namespace System.Windows.Forms
             Init();
         }
 
-        private static string appDataDirectory { get {
-                string[] assemblyFullName = Assembly.GetEntryAssembly().FullName.Split(',');
+        private static string appDataDirectory {
+            get {
+                AssemblyName assembly = Assembly.GetEntryAssembly().GetName();
+                string[] assemblyFullName = assembly.FullName.Split(',');
                 string _namespace = assemblyFullName[0];
-                AssemblyName assembly = Assembly.GetExecutingAssembly().GetName();
                 return Path.Combine(_namespace, assembly.Name, assembly.Version.ToString());
             }
         }
 
         public static string CommonAppDataPath {
             get {
-                return Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),appDataDirectory);
+                string dir = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),appDataDirectory);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                return dir;
             } 
         }
         public static string UserAppDataPath
         {
             get
             {
-                return Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),appDataDirectory);
+                string dir = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appDataDirectory);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                return dir;
             }
         }
         public static string LocalUserAppDataPath
         {
             get
             {
-                return Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),appDataDirectory);
+                string dir = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),appDataDirectory);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                return dir;
             }
         }
+        private static string _excutablepath;
         public static string ExecutablePath { 
             get {
-                System.Diagnostics.ProcessModule module = System.Diagnostics.Process.GetCurrentProcess().MainModule;
-                if (module.ModuleName.ToLower() == "dotnet" || module.ModuleName.ToLower() == "dotnet.exe")
-                    return Assembly.GetEntryAssembly().Location;
-                else
-                    return module.FileName;
+                if (_excutablepath == null)
+                {
+                    var args = Environment.GetCommandLineArgs();
+                    if (args.Length > 0)
+                    {
+                        _excutablepath = args[0];
+                    }
+                    else
+                    {
+#if NET6_0_OR_GREATER
+                        _excutablepath = Assembly.GetEntryAssembly().Location;
+                        if (string.IsNullOrWhiteSpace(_excutablepath))
+                            _excutablepath = Environment.ProcessPath;
+#else
+                        _excutablepath = Assembly.GetEntryAssembly().Location;
+                        if (string.IsNullOrWhiteSpace(_excutablepath))
+                            _excutablepath = Path.Combine(AppContext.BaseDirectory, Assembly.GetEntryAssembly()?.GetName().Name, ".dll");
+#endif
+                    }
+                }
+                return _excutablepath;
             }
         }
-        public static string StartupPath { get { return System.IO.Directory.GetCurrentDirectory(); } }
+        private static string _startuppath;
+        public static string StartupPath { get {
+                if (_startuppath == null)
+                {
+                    string appstart = AppContext.BaseDirectory;
+                    if (string.IsNullOrWhiteSpace(appstart))
+                        appstart = Directory.GetCurrentDirectory();
+                    else
+                        Directory.SetCurrentDirectory(appstart);
+                    _startuppath = appstart;
+                }
+                return _startuppath;
+            } 
+        }
 
         private static readonly object internalSyncObject = new object();
         public static CultureInfo CurrentCulture
@@ -93,7 +129,11 @@ namespace System.Windows.Forms
         }
         public static void DoEvents()
         {
-            while(Gtk.Application.EventsPending())
+            var context = GLib.MainContext.Default;
+            while (context.HasPendingEvents)
+                context.RunIteration(false);
+
+            while (Gtk.Application.EventsPending())
                 Gtk.Application.RunIteration(false);
         }
         public static Gtk.Application App { get; private set; }
@@ -102,17 +142,14 @@ namespace System.Windows.Forms
             if (App == null)
             {
                 string css_style = @"
-
-/* 定义控件样式*/
-
-@define-color frame_color  alpha(@theme_fg_color, 0.2);
+@define-color frame_color  alpha(@theme_fg_color, 0.3);
 @define-color frame3d_color  alpha(@theme_fg_color, 0.2);
-
+@define-color frame3d_color5  alpha(@theme_fg_color, 0.4);
 @define-color line_color #ECECEC;
 @define-color separator_color1 #C6C5C4;
 @define-color separator_color2 #D6D7D8;
 
-.DefaultThemeStyle{padding: 0px 2px; border-style:solid;min-height:6px;min-width:6px;}
+.DefaultThemeStyle{padding: 0px; border-style:solid;min-height:2px;min-width:2px;}
 .DefaultThemeStyle entry{
    padding: 4px 5px; border-width: 1px; border-style: solid; border-color:@frame_color;
    background-color: @theme_base_color; color: @theme_text_color;
@@ -122,12 +159,14 @@ namespace System.Windows.Forms
    background-color: @theme_base_color; color: @theme_text_color;
 }
 .DefaultThemeStyle button{padding:4px 3px;}
+.titlebar{border-radius: 0px; border-bottom: solid 1px #cfcfcf;}
+.ButtonNone{padding:0px;margin:0px;border-radius:0px;border-style:none;box-shadow:none;}
+.ButtonNone.check,.ButtonNone check{padding-top:0px;padding-bottom:0px;;margin-top:0px;margin-bottom:0px;}
 .BorderNone{border-style:none;box-shadow:none;}
+.BorderFixedSingle{border-width:0px;border-style:none;padding:1px;box-shadow: 0px 0px 0px 1px @frame_color;}
+.BorderFixed3D{border-width:0px;border-style:none; padding:2px 1px 1px 2px;box-shadow: 0px 0px 0px 1px @frame3d_color, inset 2px 2px 0px 0px @frame3d_color5;}
 
-.BorderFixedSingle{border-width:0px;border-style:none;padding:1px;box-shadow: inset 0px 0px 0px 1px @frame_color;}
-.BorderFixed3D{border-width:0px;border-style:none; padding:2px; box-shadow: inset 1px 1px 1px 2px @frame3d_color;}
-
-.DataGridView {border-width:1px;margin:-3px;}
+.DataGridView {margin:0px;}
 .GridViewCell-Button{ color:@theme_text_color; border:solid 1px @frame_color; background-color: shade(@theme_bg_color, 0.7);}
 .GridViewCell-Button:hover{background-color: shade(@theme_bg_color, 0.8);}
 .GridViewCell-Button:selected{ color:blue}
@@ -138,17 +177,16 @@ namespace System.Windows.Forms
 .ComboBox entry{border-right-width:0px;  }
 .ComboBox entry.flat{border-right-width:0px;  }
 .ComboBox entry:focus{border-right-width:0px; box-shadow: inset 0px 0px 0px 1px #62a0ea;}
-.ComboBox button{padding-top:0px;padding-bottom:0px;border-width: 1px 1px 1px 1px; border-style: solid; border-color:@frame_color;}
+.ComboBox button{padding-top:1px;padding-bottom:1px;border-width: 1px 1px 1px 1px; border-style: solid; border-color:@frame_color;}
 
-.DropDownList button{padding:0px;}
+.DropDownList button{padding:2px;}
 .SplitContainer{padding:0px;border:0px;box-shadow:none;}
-/* 当有滚动条时，宽高小于60px有异常信息输出 */
-.SplitterPanel{padding:0px;margin:0px;border:0px;box-shadow:none;min-width:60px;min-height:60px;}
+.SplitterPanel{padding:0px;margin:0px;border:0px;box-shadow:none;min-width:20px;min-height:20px;}
 .SplitterPanel .frame{padding:0px;margin:0px;border:0px;box-shadow:none;}
 .SplitterPanel .flat{padding:0px;margin:0px;border:0px;box-shadow:none;}
 
-.TableLayoutPanel {box-shadow: 1px 1px 1px 0px @frame_color;}
-.TableLayoutPanel viewport.frame {box-shadow: inset 1px 1px 1px 0 @frame_color;}
+.TableLayoutPanel {box-shadow: 0px 0px 0px 1px @frame_color;padding:0px;}
+.TableCellBorder grid>viewport.frame {box-shadow: 1px 1px 1px 0 @frame_color;border-width:0px;}
 .ListView{border:inset 1px @frame_color;}
 .ListView .Label{background-color:transparent;} 
 .ListView checkbutton {padding:0px;}
@@ -156,32 +194,49 @@ namespace System.Windows.Forms
 .ListView flowboxchild {padding:0px;}
 .ListView flowboxchild viewport{padding:2px 0px;}
 .ListView .GridBorder viewport{box-shadow: inset -1px -1px #eeeeee;}
-.ListViewHeader {background-color:@theme_bg_color; opacity:0.88;padding:0px;min-height:6px; }
+.ListViewHeader {background-color:@theme_bg_color; padding:0px;min-height:6px; }
 .ListViewHeader button{box-shadow:inset -1px 0px @frame_color;border-width:0px; border-radius:0px; padding:0px 0px 5px 0px;min-height:20px;min-width:6px;margin:0px; }
 .ListViewHeader button.frame{border-width:0px;padding:0px 0px 0px 0px;margin:0px; }
 .ListView .GroupLine{border-top:inset 1px #6677bb;}
 .ListView .GroupTitle{padding-left:5px;padding-right:5px; color:#6677bb; }
 .ListView .GroupSubTitle{padding-left:5px;padding-right:5px; }
-.StatusStrip{padding:0px; border-width:1px 0px 0px 0px; border-top:solid 1px @frame_color;}
-.ToolStrip button{padding:0px;}
+.GroupBox>border{border: solid 1px rgba(76, 66, 66, 0.3);}
 
-.NumericUpDown{border-width:1px;padding:2px; }
-.NumericUpDown button.up{border-width:0px;padding:0px;}
-.NumericUpDown button.down{border-width:0px;padding:0px;}
-.NumericUpDown.horizontal entry{border-width:0px;padding:2px 3px; min-height:6px;min-width:6px;} 
-.NumericUpDown.vertical entry{border-width:0px;padding:2px 3px; min-height:6px;min-width:6px;} 
+.ToolStrip,.MenuStrip{padding:0px;border-radius:0px;min-height:6px;min-width:6px;}
+.ToolStrip>toolbutton,.ToolStrip>toolbutton label{padding:0px;margin:0px;}
+.MenuStrip>menuitem,.MenuStrip>menuitem label{padding:0px;margin:0px;}
+.ToolStrip button,.MenuStrip button{padding-top:0px;padding-bottom:0px; min-height:6px;min-width:6px;border-radius:0px;border-width:1px;}
+.ToolStrip combox,.MenuStrip combox{padding-top:0px;padding-bottom:0px; min-height:6px;min-width:6px;border-radius:0px;border-width:0px;}
+.ToolStrip entry,.MenuStrip entry{padding-top:0px;padding-bottom:0px; min-height:6px;min-width:6px;border-radius:0px;border-width:1px;}
+.ToolStrip levelbar,.MenuStrip levelbar{padding:0px;min-height:6px;min-width:6px;border-radius:0px;border-width:0px;}
+.StatusStrip {border-top:solid 1px @frame_color;}
+.MenuItemButton {background-color:transparent;background:none; border:none; border-radius:0px;border-width:0px; padding:0px;box-shadow:none; min-width:1px;min-height:1px;}
+.ToolStrip checkbutton,.MenuStrip checkbutton{margin-left:-20px; padding:0px; } 
+.ToolStrip menu button image,.MenuStrip menu button image{margin-left:-22px;}
+.ToolStrip menu button image+label,.MenuStrip menu button image+label{margin-left:-2px; }
+.ToolStrip>separator,.MenuStrip>separator{padding:0px;margin:2px;}
+
+.ContextMenuStrip button image{margin-left:-22px; }
+.ContextMenuStrip button image+label{margin-left:-2px; }
+.ContextMenuStrip checkbutton{margin-left:-22px;}
+.NumericUpDown{padding:1px; min-height:6px;min-width:6px; }
+.NumericUpDown button.up{padding:0px;}
+.NumericUpDown button.down{padding:0px;}
+.NumericUpDown.horizontal entry{margin:1px;border-width:0px;padding:2px 3px; min-height:6px;min-width:6px;} 
+.NumericUpDown.vertical entry{margin:1px;border-width:0px;padding:2px 3px; min-height:6px;min-width:6px;} 
 .TrackBar {border-width:0px;box-shadow:none;}
 .PrintPreviewBack{background-color:#cccccc; border-radius:0px;}
 .Paper{box-shadow: 0px 0px 3px 1px #999999;background:#ffffff; border-radius:0px;}
 .PropertyGrid {box-shadow:0px 0px 0px 1px @frame_color; background:#eeeeee;}
 .PropertyGrid button{background:#eeeeee;}
+.PictureBox {padding:0px;}
+tooltip { background-color: #ffffff; color: #555555; border: 1px solid #c9c9c9; box-shadow: 3px 3px 2px #787878;}
+tooltip window,tooltip.background {background-color: #ffffff;}
+tooltip label {padding: 0px 10px; color: #555555;}
+
 ";
 
-                string appdirectory = "./";// StartupPath; //由于linux系统常用到环境变量路径，会导至Directory/Environment获取到的当前目录不正确
-                if (!File.Exists($"{appdirectory}/GTKSystem.Windows.Forms.dll"))
-                {
-                    appdirectory = Path.GetDirectoryName(ExecutablePath);
-                }
+                string appdirectory = StartupPath;
                 string resourcepath = Path.Combine(appdirectory, "Resources");
                 string themepath = Path.Combine(appdirectory, "theme");
                 string themesetuppath = Path.Combine(themepath, "setup.theme");
@@ -204,6 +259,7 @@ namespace System.Windows.Forms
                 Gtk.Settings settings = Gtk.Settings.Default;
                 settings.SplitCursor = true;
                 settings.EnableAnimations = true;
+                settings.EnableTooltips = true;
                 string iconpath = Path.Combine(appdirectory, "icon.png");
                 if (File.Exists(iconpath))
                     Gtk.Window.SetDefaultIconFromFile(iconpath);
@@ -251,13 +307,6 @@ namespace System.Windows.Forms
                                     Console.WriteLine(themefolder + "=》目录不存在");
                                 }
                             }
-                            if (nameValue.TryGetValue("ThemeCssPath", out string themecss))
-                            {
-                                if (File.Exists(themecss))
-                                {
-                                    cssBuilder.AppendFormat("@import url(\"{0}\");", themecss).AppendLine();
-                                }
-                            }
                         }
                     }
                     if (nameValue.TryGetValue("UseCustomStyle", out string customstyle))
@@ -299,8 +348,6 @@ namespace System.Windows.Forms
                     setupthemecontent.AppendLine("Name=mytheme");
                     setupthemecontent.AppendLine("/* 主题文件所在文件夹 */");
                     setupthemecontent.AppendLine("ThemeFolder=theme");
-                    setupthemecontent.AppendLine("/* css文件路径 */");
-                    setupthemecontent.AppendLine("ThemeCssPath=theme/mytheme/theme.css");
 
                     setupthemecontent.AppendLine().AppendLine("[custom style]");
                     setupthemecontent.AppendLine("/* 自由定义样式文件 */");
@@ -336,9 +383,26 @@ namespace System.Windows.Forms
         }
         public static void Run(Form mainForm)
         {
+            if (mainForm.ShowInTaskbar == false)
+            {
+                Gtk.Window pw = new Gtk.Window(Gtk.WindowType.Toplevel);
+                pw.WindowPosition = Gtk.WindowPosition.Center;
+                pw.Decorated = false;
+                pw.WidthRequest = 1;
+                pw.HeightRequest = 1;
+                pw.SkipTaskbarHint = true;
+                mainForm.self.TransientFor = pw;
+                pw.Shown += Pw_Shown;
+                pw.Show();
+            }
             mainForm.self.Destroyed += Control_Destroyed;
             mainForm.Show();
             Gtk.Application.Run();
+        }
+        private static void Pw_Shown(object? sender, EventArgs e)
+        {
+            Gtk.Window pw = (Gtk.Window)sender;
+            pw.Window.Hide();
         }
         private static void Control_Destroyed(object sender, EventArgs e)
         {

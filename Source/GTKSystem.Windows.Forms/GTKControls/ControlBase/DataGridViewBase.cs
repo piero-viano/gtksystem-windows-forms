@@ -6,12 +6,12 @@
         public DataGridViewBase() : base()
         {
             this.Override = new GtkControlOverride(this);
-            this.Override.AddClass("DataGridView");
+            this.StyleContext.AddClass("DataGridView");
             this.Override.BackColor = System.Drawing.Color.White;
             this.BorderWidth = 0;
-            this.ShadowType = Gtk.ShadowType.Out;
+            this.ShadowType = Gtk.ShadowType.None;
             GridView.Valign = Gtk.Align.Start;
-            GridView.Halign = Gtk.Align.Start;
+            GridView.Halign = Gtk.Align.Fill;
             GridView.BorderWidth = 0;
             GridView.EnableGridLines = Gtk.TreeViewGridLines.Both;
             GridView.EnableTreeLines = true;

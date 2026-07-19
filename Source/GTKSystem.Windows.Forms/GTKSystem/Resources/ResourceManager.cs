@@ -23,7 +23,7 @@ namespace GTKSystem.Resources
         private Assembly _assembly;
         private string _baseName;
         public ResourceInfo GetResourceInfo = new ResourceInfo();
-        public ResourceManager([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type? usingResourceSet) : this(null, null, usingResourceSet)
+        public ResourceManager([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type? usingResourceSet) : this(null, null, usingResourceSet)
         {
 
         }
@@ -31,7 +31,7 @@ namespace GTKSystem.Resources
         {
 
         }
-        public ResourceManager(string baseName, Assembly assembly, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type? usingResourceSet) : base(baseName, assembly, usingResourceSet)
+        public ResourceManager(string baseName, Assembly assembly, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] Type? usingResourceSet) : base(baseName, assembly, usingResourceSet)
         {
             this._baseName = baseName;
             this._assembly = assembly;
@@ -50,9 +50,8 @@ namespace GTKSystem.Resources
             byte[] result = null;
             try
             {
-                //string resourceDirctory = System.AppContext.BaseDirectory.Replace("\\", "/") + $"Resources";//linux路径必须用/
-                //string resourceDirctory = Environment.CurrentDirectory.Replace("\\", "/") + $"Resources";//linux路径必须用/
-                string filepath = $"./{Path.GetExtension(_baseName).TrimStart('.')}.resx"; //linux路径必须用/
+                string resourceDirctory = "Resources";
+                string filepath = Path.Combine(resourceDirctory, $"{Path.GetExtension(_baseName).TrimStart('.')}.resx");
                 if (System.IO.File.Exists(filepath))
                 {
                     try
@@ -102,13 +101,14 @@ namespace GTKSystem.Resources
                         {
                             try
                             {
-                                if(dict.Value is ImageListStreamer streamer)
+                                object obj = dict.Value;
+                                if (obj is ImageListStreamer streamer)
                                 {
                                     streamer.ResourceInfo = GetResourceInfo;
                                     return streamer;
                                 }
                                 else
-                                    return dict.Value;
+                                    return obj;
                             }
                             catch
                             {
@@ -131,7 +131,7 @@ namespace GTKSystem.Resources
                 throw new FileNotFoundException();
             else
             {
-                Stream stream = _assembly.GetManifestResourceStream(_baseName + ".resources");
+                Stream stream = _assembly.GetManifestResourceStream(_baseName + ResFileExtension);
                 GTKSystem.Resources.Extensions.DeserializingResourceReader reader = new GTKSystem.Resources.Extensions.DeserializingResourceReader(stream);
                 IDictionaryEnumerator dict = reader.GetEnumerator();
                 while (dict.MoveNext())
@@ -153,18 +153,7 @@ namespace GTKSystem.Resources
         }
         public override object GetObject(string name, CultureInfo culture)
         {
-            object result = GetObject(name);
-            var stack = new StackTrace(true);
-            System.Reflection.MethodInfo method = (System.Reflection.MethodInfo)stack.GetFrame(1).GetMethod();
-            if (method.ReturnType.Name == "Object" || method.ReturnType.Name.Equals(result.GetType().Name))
-            {
-                return result;
-            }
-            else
-            {
-                return null;
-            }
-
+            return GetObject(name);
         }
         public override object GetObject(string name)
         {
@@ -178,38 +167,42 @@ namespace GTKSystem.Resources
                 }
                 else
                 {
+                    byte[] filebytes = null;
                     string fileName = name;
-                    byte[] filebytes = ReadResourceFile(name);
-                    if (filebytes == null)
+                    string _formName = Path.GetExtension(this._baseName).TrimStart('.');
+                    if (_formName.EndsWith("Resources"))
+                        _formName = "";
+                    string directory = Path.Combine("Resources", _formName);
+                    string[] files = Directory.GetFiles(directory, $"{fileName}.*", SearchOption.TopDirectoryOnly);
+                    if (files != null && files.Length > 0)
                     {
-                        string _formName = Path.GetExtension(this.BaseName).TrimStart('.');
-                        string[] files = Directory.GetFiles($"./Resources/{_formName}", $"{fileName}.*", SearchOption.AllDirectories);
-                        if (files != null && files.Length > 0)
-                        {
-                            fileName = files[0];
-                            filebytes = File.ReadAllBytes(files[0]);
-                        }
+                        fileName = files[0];
+                        filebytes = File.ReadAllBytes(files[0]);
+                    }
 
-                    }
-                    if (name.EndsWith(".BackgroundImage"))
+                    if (name.EndsWith(".Icon"))
                     {
-                        return new System.Drawing.Bitmap(filebytes) { FileName = fileName }; 
-                    }
-                    else if (name.EndsWith(".Image"))
-                    {
-                        return new System.Drawing.Bitmap(filebytes) { FileName = fileName }; 
-                    }
-                    else if (name.EndsWith(".Icon"))
-                    {
-                        return new System.Drawing.Icon(filebytes) { FileName = fileName };
-                    }
-                    else if (filebytes == null)
-                    {
-                        return new System.Drawing.Bitmap(0, 0);
+                        if (filebytes != null)
+                        {
+                            return new System.Drawing.Icon(filebytes) { FileName = fileName };
+                        }
+                        else
+                        {
+                            Stream stream = typeof(GTKSystem.Resources.ResourceManager).Assembly.GetManifestResourceStream("GTKSystem.Windows.Forms.Resources.System.Panel.ico");
+                            return new Icon(stream);
+                        }
                     }
                     else
                     {
-                        return new System.Drawing.Bitmap(filebytes) { FileName = fileName };
+                        if (filebytes != null)
+                        {
+                            return new System.Drawing.Bitmap(filebytes) { FileName = fileName };
+                        }
+                        else
+                        {
+                            Stream stream = typeof(GTKSystem.Resources.ResourceManager).Assembly.GetManifestResourceStream("GTKSystem.Windows.Forms.Resources.System.image-missing16.png");
+                            return new Bitmap(stream);
+                        }
                     }
                 }
             }
@@ -218,7 +211,59 @@ namespace GTKSystem.Resources
                 return obj;
             }
         }
-      
+        string DetectByFileHeader(Stream stream)
+        {
+            try
+            {
+                using (var reader = new BinaryReader(stream))
+                {
+                    // 读取前16个字节
+                    byte[] header = reader.ReadBytes(16);
+
+                    if (header.Length < 2) return "文件太小";
+
+                    // JPEG: FF D8
+                    if (header[0] == 0xFF && header[1] == 0xD8)
+                        return "JPEG";
+
+                    // PNG: 89 50 4E 47 0D 0A 1A 0A
+                    if (header[0] == 0x89 && header[1] == 0x50 &&
+                        header[2] == 0x4E && header[3] == 0x47 &&
+                        header[4] == 0x0D && header[5] == 0x0A &&
+                        header[6] == 0x1A && header[7] == 0x0A)
+                        return "PNG";
+
+                    // GIF: GIF87a or GIF89a
+                    if (header[0] == 0x47 && header[1] == 0x49 &&
+                        header[2] == 0x46 && header[3] == 0x38 &&
+                        (header[4] == 0x37 || header[4] == 0x39) &&
+                        header[5] == 0x61)
+                        return "GIF";
+
+                    // BMP: BM
+                    if (header[0] == 0x42 && header[1] == 0x4D)
+                        return "BMP";
+
+                    // TIFF: II or MM
+                    if ((header[0] == 0x49 && header[1] == 0x49) ||
+                        (header[0] == 0x4D && header[1] == 0x4D))
+                        return "TIFF";
+
+                    // WebP: RIFF + WEBP
+                    if (header[0] == 0x52 && header[1] == 0x49 &&
+                        header[2] == 0x46 && header[3] == 0x46 &&
+                        header[8] == 0x57 && header[9] == 0x45 &&
+                        header[10] == 0x42 && header[11] == 0x50)
+                        return "WebP";
+
+                    return null;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
         //public  UnmanagedMemoryStream GetStream(string name)
         //{
         //    return GetStream(name);

@@ -5,31 +5,28 @@ namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
 {
     public sealed class TabPageBase : ScrollableBoxBase
     {
-        public Gtk.Overlay Content = new Gtk.Overlay();
+        public Gtk.Overlay contaner = new Gtk.Overlay();
         public TabPageBase() : base()
         {
             this.Override = new GtkControlOverride(this);
-            this.Override.AddClass("TabPage");
+            this.StyleContext.AddClass("TabPage");
             this.BorderWidth = 0;
-            this.Content.Margin = 0;
-            this.Content.Halign = Align.Fill;
-            this.Content.Valign = Align.Fill;
-            this.Content.Expand = false;
-            this.Content.Add(new Gtk.Fixed() { Halign = Align.Fill, Valign = Align.Fill });
-            base.Halign = Align.Fill;
-            base.Valign = Align.Fill;
-            base.Add(Content);
+            this.contaner.Margin = 0;
+            this.contaner.Halign = Align.Fill;
+            this.contaner.Valign = Align.Fill;
+            this.contaner.Expand = false;
+            this.Halign = Align.Fill;
+            this.Valign = Align.Fill;
+
+            Gtk.DrawingArea background = new Gtk.DrawingArea();
+            background.Events = Gdk.EventMask.EnterNotifyMask;
+            background.Drawn += Background_Drawn;
+            contaner.Add(background);
+            this.Add(contaner);
         }
-        protected override void OnShown()
+        private void Background_Drawn(object o, DrawnArgs args)
         {
-            Override.OnAddClass();
-            base.OnShown();
-        }
-        protected override bool OnDrawn(Cairo.Context cr)
-        {
-            Gdk.Rectangle rec = new Gdk.Rectangle(0, 0, this.AllocatedWidth, this.AllocatedHeight);
-            Override.OnPaint(cr, rec);
-            return base.OnDrawn(cr);
+            Override.OnPaint(args.Cr);
         }
     }
 }
