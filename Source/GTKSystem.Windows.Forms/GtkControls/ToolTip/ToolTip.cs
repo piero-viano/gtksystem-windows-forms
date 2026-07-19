@@ -369,9 +369,6 @@ public partial class ToolTip : Component, IExtenderProvider
     {
         Hide(((ToolTipTimer)source!).Host);
     }
-    ~ToolTip() { 
-    
-    }
 
     public override string ToString()
     {

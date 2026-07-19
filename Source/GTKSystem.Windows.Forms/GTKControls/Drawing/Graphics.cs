@@ -17,7 +17,6 @@ namespace System.Drawing
         private Gdk.Rectangle rectangle;
         private Gtk.Widget widget;
         private Image image;
-        public static Cairo.Context Context;
         #region 用于输入与输出的数值调整差值
         internal double diff_left { get; set; }
         internal double diff_top { get; set; }
@@ -226,6 +225,7 @@ namespace System.Drawing
             }
             else if (pen.Brush is PathGradientBrush pbrush)
             {
+                //´此笔刷固定为径向渐变
                 float radius = Math.Max(pbrush.Rectangle.Width, pbrush.Rectangle.Height);
                 int linearcount = pbrush.SurroundColors.Length + 1;
                 using Cairo.RadialGradient gradient = new Cairo.RadialGradient(diff_left + pbrush.CenterPoint.X, diff_top + pbrush.CenterPoint.Y, radius/ linearcount, diff_left + pbrush.CenterPoint.X, diff_top + pbrush.CenterPoint.Y, radius);

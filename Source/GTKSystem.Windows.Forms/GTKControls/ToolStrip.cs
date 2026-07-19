@@ -4,6 +4,7 @@
  * 技术支持438865652@qq.com，https://www.gtkapp.com, https://gitee.com/easywebfactory, https://github.com/easywebfactory
  * author:chenhongjin
  */
+using Gtk;
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.Drawing;
 
