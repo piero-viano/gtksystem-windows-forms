@@ -30,3 +30,12 @@ $RECYCLE.BIN/
 *.lnk
 obj
 bin
+/Samples/GTKSystemWinFormsApp11/obj/GTKSystemWinFormsApp11.csproj.nuget.g.targets
+/Samples/GTKWinFormsApp/bin/Debug/net8.0/theme/setup.theme
+/Samples/GTKWinFormsApp/bin/Debug/net8.0/theme/style.css
+/Samples/GTKWinFormsApp/obj/GTKWinFormsApp/GTKWinFormsApp.csproj.nuget.g.targets
+/Samples/GTKWinFormsApp/obj/GTKWinFormsApp/project.assets.json
+/Samples/GTKWinFormsApp/obj/GTKWinFormsApp/project.nuget.cache
+/Samples/GTKWinFormsApp/GTKWinFormsApp.csproj.user
+/Samples/GTKWinFormsApp/GTKWinFormsApp.xml
+/Source/GTKSystem.Windows.Forms/GTKSystem.Windows.Forms.xml
