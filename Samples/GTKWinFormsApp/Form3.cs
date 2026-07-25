@@ -121,10 +121,10 @@ namespace GTKWinFormsApp
             this.Show();
         }
 
-        NotifyIcon notifyIcon;
+        NotifyIcon? notifyIcon;
         private void NotifyIcon_MouseClick(object sender, MouseEventArgs e)
         {
-            notifyIcon.ShowBalloonTip(20000);
+            notifyIcon?.ShowBalloonTip(20000);
         }
 
         private void Panel1_DoubleClick(object? sender, EventArgs e)
@@ -142,7 +142,7 @@ namespace GTKWinFormsApp
             panel5.Refresh();
         }
 
-        private void Form3_Shown(object sender, EventArgs e)
+        private void Form3_Shown(object? sender, EventArgs e)
         {
 
             // SwitchBox switchBox = new SwitchBox();
@@ -150,7 +150,7 @@ namespace GTKWinFormsApp
             //panel1.Controls.Add(switchBox);
         }
 
-        private void Form3_SizeChanged(object sender, EventArgs e)
+        private void Form3_SizeChanged(object? sender, EventArgs e)
         {
             //panel1.Refresh();
             ////Console.WriteLine(Width);
@@ -158,7 +158,7 @@ namespace GTKWinFormsApp
             //this.Refresh();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object? sender, EventArgs e)
         {
             //button1.ForeColor=Color.Red;
             //button1.BackColor=Color.Green;
@@ -166,12 +166,12 @@ namespace GTKWinFormsApp
             f.ShowDialog(this);
         }
 
-        private void trackBar1_Scroll(object sender, EventArgs e)
+        private void trackBar1_Scroll(object? sender, EventArgs e)
         {
             label1.Text = trackBar1.Value.ToString();
         }
         private int temp;
-        private void Form3_Load(object sender, EventArgs e)
+        private void Form3_Load(object? sender, EventArgs e)
         {
 
             var result = this.BeginInvoke(new MethodInvoker(() =>
@@ -218,7 +218,7 @@ namespace GTKWinFormsApp
         private void panel3_Paint(object sender, PaintEventArgs e)
         {
 
-            var g = e.Graphics;
+            var g = e.Graphics!;
 
             GraphicsPath path = new GraphicsPath();
 
@@ -280,14 +280,14 @@ namespace GTKWinFormsApp
             g.DrawImageUnscaled(image, 0, 0);
         }
 
-        private void ssssToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void ssssToolStripMenuItem1_Click(object? sender, EventArgs e)
         {
             Form2 f1 = new Form2();
             DialogResult res = f1.ShowDialog(this);
             Console.WriteLine(res);
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button2_Click(object? sender, EventArgs e)
         {
             Form4 f = new Form4();
             f.Show(this);
@@ -298,26 +298,26 @@ namespace GTKWinFormsApp
             Console.WriteLine($"panel5_Scroll:{e.OldValue},{e.NewValue};{e.ScrollOrientation}");
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void button3_Click(object? sender, EventArgs e)
         {
             //打印
  
  
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void button4_Click(object? sender, EventArgs e)
         {
             Form2 f1 = new Form2();
             f1.ShowDialog(this);
         }
 
-        private void toolStripSplitButton1_Click(object sender, EventArgs e)
+        private void toolStripSplitButton1_Click(object? sender, EventArgs e)
         {
             //MessageBox.Show("ddddddd");
             Console.WriteLine("toolStripSplitButton1_Click");
         }
 
-        private void toolStripSplitButton1_DoubleClick(object sender, EventArgs e)
+        private void toolStripSplitButton1_DoubleClick(object? sender, EventArgs e)
         {
             Console.WriteLine("toolStripSplitButton1_DoubleClick");
             //MessageBox.Show("toolStripSplitButton1_DoubleClick");

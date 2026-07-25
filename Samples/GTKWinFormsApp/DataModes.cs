@@ -13,34 +13,34 @@ namespace GTKWinFormsApp
     public class TestDataMode
     {
         [DataMember]
-        public string name { get; set; }
+        public string name { get; set; } = string.Empty;
         [DataMember]
-        public string treeID { get; set; }
+        public string treeID { get; set; } = string.Empty;
         [DataMember]
-        public string parent { get; set; }
+        public string parent { get; set; } = string.Empty;
         [DataMember]
-        public string treeName { get; set; }
+        public string treeName { get; set; } = string.Empty;
     }
     [DataContract]
     public class TestEntity
     {
         [DataMember]
         public int ID { get; set; }
-        public string title;
+        public string title = string.Empty;
         [DataMember]
         public string Title { get { return title; } set { title = value; } }
         [DataMember]
-        public string Info { get; set; }
+        public string Info { get; set; } = string.Empty;
         [DataMember]
         public bool State { get; set; }
         [DataMember]
-        public string CreateDate { get; set; }
+        public string CreateDate { get; set; } = string.Empty;
         [DataMember]
-        public string Operate { get; set; }
+        public string Operate { get; set; } = string.Empty;
         [DataMember]
-        public string PIC1 { get; set; }
+        public string PIC1 { get; set; } = string.Empty;
         [DataMember]
-        public Image PIC { get; set; }
+        public Image? PIC { get; set; }
     }
 
 }

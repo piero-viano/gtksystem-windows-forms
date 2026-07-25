@@ -73,52 +73,52 @@ namespace GTKWinFormsApp
         {
             Rectangle rect = e.ClipRectangle;
             int _val_pc1 = volatility(rect.Height, 1.2);
-            e.Graphics.Clear(Color.White);
-            e.Graphics.FillRectangle(new SolidBrush(Color.Blue), 0, _val_pc1, rect.Width, rect.Height);
+            e.Graphics!.Clear(Color.White);
+            e.Graphics!.FillRectangle(new SolidBrush(Color.Blue), 0, _val_pc1, rect.Width, rect.Height);
         }
         private void pictureBox_CC1_Paint(object sender, PaintEventArgs e)
         {
             int _val_cc1 = volatility(pictureBox_CC1.Height, 2.2);
-            e.Graphics.FillRectangle(new SolidBrush(Color.LightSkyBlue), 0, _val_cc1, pictureBox_CC1.Width, pictureBox_CC1.Height);
+            e.Graphics!.FillRectangle(new SolidBrush(Color.LightSkyBlue), 0, _val_cc1, pictureBox_CC1.Width, pictureBox_CC1.Height);
         }
 
         private void pictureBox_PC2_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.FillRectangle(new SolidBrush(Color.Blue), 0, pictureBox_PC2.Height / 2, pictureBox_PC2.Width, pictureBox_PC2.Height);
+            e.Graphics!.FillRectangle(new SolidBrush(Color.Blue), 0, pictureBox_PC2.Height / 2, pictureBox_PC2.Width, pictureBox_PC2.Height);
         }
 
         private void pictureBox_CC2_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.FillRectangle(new SolidBrush(Color.LightSkyBlue), 0, pictureBox_CC2.Height / 2, pictureBox_CC2.Width, pictureBox_CC2.Height);
+            e.Graphics!.FillRectangle(new SolidBrush(Color.LightSkyBlue), 0, pictureBox_CC2.Height / 2, pictureBox_CC2.Width, pictureBox_CC2.Height);
         }
 
         private void pictureBox_PC3_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.FillRectangle(new SolidBrush(Color.LightSkyBlue), 0, pictureBox_PC3.Height / 2, pictureBox_PC3.Width, pictureBox_PC3.Height);
+            e.Graphics!.FillRectangle(new SolidBrush(Color.LightSkyBlue), 0, pictureBox_PC3.Height / 2, pictureBox_PC3.Width, pictureBox_PC3.Height);
         }
 
         private void pictureBox_PC4_Paint(object sender, PaintEventArgs e)
         {
             int width = pictureBox_PC4.Width;
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 20), new PointF(width, 20));
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 40), new PointF(width, 40));
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 60), new PointF(width, 60));
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 80), new PointF(width, 80));
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 100), new PointF(width, 100));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 20), new PointF(width, 20));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 40), new PointF(width, 40));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 60), new PointF(width, 60));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 80), new PointF(width, 80));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.LightGray), 1), new PointF(0, 100), new PointF(width, 100));
 
-            e.Graphics.FillRectangle(new SolidBrush(Color.LightSkyBlue), 0, pictureBox_PC4.Height / 2, pictureBox_PC4.Width, pictureBox_PC4.Height);
+            e.Graphics!.FillRectangle(new SolidBrush(Color.LightSkyBlue), 0, pictureBox_PC4.Height / 2, pictureBox_PC4.Width, pictureBox_PC4.Height);
         }
 
         private void pictureBox_CC4_Paint(object sender, PaintEventArgs e)
         {
             int width = pictureBox_CC4.Width;
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0,20), new PointF(width, 20));
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0, 40), new PointF(width, 40));
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0, 60), new PointF(width, 60));
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0, 80), new PointF(width, 80));
-            e.Graphics.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0, 100), new PointF(width, 100));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0,20), new PointF(width, 20));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0, 40), new PointF(width, 40));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0, 60), new PointF(width, 60));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0, 80), new PointF(width, 80));
+            e.Graphics!.DrawLine(new Pen(new SolidBrush(Color.Gray), 1), new PointF(0, 100), new PointF(width, 100));
 
-            e.Graphics.FillRectangle(new SolidBrush(Color.Blue), 0, pictureBox_CC4.Height / 2, pictureBox_CC4.Width, pictureBox_CC4.Height);
+            e.Graphics!.FillRectangle(new SolidBrush(Color.Blue), 0, pictureBox_CC4.Height / 2, pictureBox_CC4.Width, pictureBox_CC4.Height);
         }
         private void pictureBox_chart_Paint(object sender, PaintEventArgs e)
         {
