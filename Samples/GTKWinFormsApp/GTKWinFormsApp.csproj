@@ -1,26 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWindowsForms>False</UseWindowsForms>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 		<EnableUnsafeBinaryFormatterSerialization>True</EnableUnsafeBinaryFormatterSerialization>
-		<ImplicitUsings>disable</ImplicitUsings>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>$(MSBuildProjectDirectory)\$(MSBuildProjectName).xml</DocumentationFile>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<GenerateResourceWarnOnBinaryFormatterUse>false</GenerateResourceWarnOnBinaryFormatterUse>
-
+		<!--
 		<PublishReadyToRun>true</PublishReadyToRun>
 		<SelfContained>false</SelfContained>
-		
+
 		<PublishAot>true</PublishAot>
 
 		<PublishTrimmed>true</PublishTrimmed>
 		<IsAotCompatible>true</IsAotCompatible>
 		<InvariantGlobalization>true</InvariantGlobalization>
 
-		
-		<!--
+
+
 		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<RuntimeIdentifier>linux-musl-x64</RuntimeIdentifier>
@@ -58,6 +60,10 @@
 	  <Content Include="TestData1.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="GTKSystem.Windows.FormsDesigner" Version="1.0.0.9" />
 	</ItemGroup>
 
 	<ItemGroup>

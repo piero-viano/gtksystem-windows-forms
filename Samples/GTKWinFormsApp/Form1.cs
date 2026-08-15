@@ -1,17 +1,16 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
-using System.Text.Json.Serialization;
 using System.Windows.Forms;
- 
+
 namespace GTKWinFormsApp
 {
     public partial class Form1 : Form
@@ -34,7 +33,26 @@ namespace GTKWinFormsApp
             button6.Click += button6_Click;
             //dataGridView1.UseModelFilter = true;
 
+            //groupBox1.self.FocusChain = new Gtk.Widget[3] { maskedTextBox2.Widget, textBox1.Widget, dateTimePicker1.Widget };
+
+            for (int i = 0; i < 80; i++)
+            {
+                Button button = new Button();
+                button.Text = i.ToString();
+                button.Size = new Size(50, 30);
+                flowLayoutPanel1.Controls.Add(button);
+            }
+
+            //pictureBox2.MouseMove += PictureBox2_MouseMove;
+
         }
+        private int mousex = 0;
+        private void PictureBox2_MouseMove(object sender, MouseEventArgs e)
+        {
+            mousex = e.X;
+            pictureBox2.Refresh();
+        }
+
         int ix = 0;
         private void DataGridView1_Click(object? sender, EventArgs e)
         {
@@ -45,9 +63,9 @@ namespace GTKWinFormsApp
             Console.WriteLine("DataGridView1_Click");
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object? sender, EventArgs e)
         {
-            
+
             treeView1.Nodes.Clear();
             treeView1.CheckBoxes = true;
             string jsontext = File.ReadAllText("TestData1.json");
@@ -57,7 +75,7 @@ namespace GTKWinFormsApp
                 object obj = dataContractJson.ReadObject(reader);
                 List<TestDataMode> json = obj as List<TestDataMode>;
 
-                IEnumerable<TreeNode> childs = GetChild(null, json);
+                IEnumerable<TreeNode> childs = GetChild(null, json ?? Enumerable.Empty<TestDataMode>());
                 treeView1.Nodes.AddRange(childs.ToArray());
                 foreach (TreeNode child in treeView1.Nodes)
                     child.Expand();
@@ -65,7 +83,7 @@ namespace GTKWinFormsApp
                 //treeView1.Nodes[0].Nodes[2].Nodes[3].Checked = true;
                 //treeView1.SelectedNode = treeView1.Nodes[0].Nodes[2];
             }
-            TabPage tabPage=new TabPage();
+            TabPage tabPage = new TabPage();
             tabPage.Location = new System.Drawing.Point(4, 29);
             tabPage.Margin = new Padding(4);
             tabPage.Name = "tabPage3";
@@ -80,12 +98,12 @@ namespace GTKWinFormsApp
             dataGridView1.DoubleClick += DataGridView1_DoubleClick;
         }
 
-        private void DataGridView1_DoubleClick(object sender, EventArgs e)
+        private void DataGridView1_DoubleClick(object? sender, EventArgs e)
         {
             Console.WriteLine("DataGridView1_DoubleClick");
         }
 
-        private IEnumerable<TreeNode> GetChild(string treeID, IEnumerable<TestDataMode> data)
+        private IEnumerable<TreeNode> GetChild(string? treeID, IEnumerable<TestDataMode> data)
         {
             List<TreeNode> children = new List<TreeNode>();
             var list = data.Where(w => w.parent == treeID);
@@ -104,16 +122,16 @@ namespace GTKWinFormsApp
         }
 
         TestEntity b = new TestEntity();
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object? sender, EventArgs e)
         {
 
             Console.WriteLine(treeView1.SelectedNode?.Text);
 
-            DialogResult result = MessageBox.Show("1、加载数据点yes \n2、不加载数据点no", "加载数据提示", MessageBoxButtons.YesNo);
-            if (result == DialogResult.No)
-            {
-                return;
-            }
+            //DialogResult result = MessageBox.Show("1、加载数据点yes \n2、不加载数据点no", "加载数据提示", MessageBoxButtons.YesNo);
+            //if (result == DialogResult.No)
+            //{
+            //    return;
+            //}
             //1、数据集列表数据源
             List<TestEntity> data = new List<TestEntity>();
             var createdate = "2012-09-14 12:32:33";
@@ -131,22 +149,25 @@ namespace GTKWinFormsApp
             this.dataGridView1.DataSource = data;
 
 
-            //this.comboBox1.DisplayMember = "Title";
-            //this.comboBox1.ValueMember = "ID";
-            //this.comboBox1.DataSource = data;
-            // dataGridView1.Columns[1].Visible = false;
+            //dataGridView1.Columns[1].Visible = false;
 
             //this.dataGridView1.Columns.RemoveAt(this.dataGridView1.Columns.Count - 1);
 
             //2、datatable数据源
             DataTable dt = new DataTable();
             dt.Columns.Add("ID", typeof(string));
-            dt.Columns.Add("CreateDate", typeof(DateTime));
+            dt.Columns.Add("Title", typeof(string));
 
             dt.Columns.Add("State", typeof(bool));
 
-            dt.Rows.Add("test1dddd", DateTime.Now, true);
-            dt.Rows.Add("test2", DateTime.Now.AddDays(5), false);
+            dt.Rows.Add("test1dddd", DateTime.Now.ToString(), true);
+            dt.Rows.Add("test2", DateTime.Now.AddDays(5).ToString(), false);
+
+            for (int i = 0; i < 3000; i++)
+            {
+                dt.Rows.Add(i, "title" + i, true);
+            }
+
             //  this.dataGridView1.Columns.Clear();
 
             //this.dataGridView1.DataSource = dt;
@@ -154,10 +175,38 @@ namespace GTKWinFormsApp
             //DataGridViewRow row = new DataGridViewRow();
             //row.Cells.AddRange(new DataGridViewTextBoxCell(), new DataGridViewTextBoxCell(), new DataGridViewTextBoxCell());
             //this.dataGridView1.Rows.Add(row);
-        }
-       
 
-        private void button2_Click(object sender, EventArgs e)
+            //Stopwatch stopwatch = Stopwatch.StartNew();
+
+            this.comboBox1.DisplayMember = "Title";
+            this.comboBox1.ValueMember = "ID";
+            //this.comboBox1.DataSource = dt;
+            this.BeginInvoke(new Action(() =>
+            {
+                //System.Threading.Tasks.Task.Delay(1400);
+                System.Threading.Thread.Sleep(1400);
+                for (int i = 1; i < 300; i++)
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        for (int ii = i; ii < i+100; ii++)
+                        {
+                            this.comboBox1.Items.Add(ii);
+                            Application.DoEvents();
+                        }
+                    }));
+                    
+                    //System.Threading.Tasks.Task.Delay(40);
+
+                }
+                Console.WriteLine("end");
+            }));
+            //stopwatch.Stop();
+            //Console.WriteLine(stopwatch.ElapsedMilliseconds);
+        }
+
+
+        private void button2_Click(object? sender, EventArgs e)
         {
             dataGridView1.EndEdit();
             //foreach (DataGridViewRow row in dataGridView1.SelectedRows)
@@ -184,10 +233,10 @@ namespace GTKWinFormsApp
             }
         }
 
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        private void toolStripMenuItem1_Click(object? sender, EventArgs e)
         {
-            ToolStripItem menu = sender as ToolStripItem;
-            Console.WriteLine(menu.Text);
+            ToolStripItem? menu = sender as ToolStripItem;
+            Console.WriteLine(menu?.Text);
         }
 
         private void textBox1_Validating(object sender, CancelEventArgs e)
@@ -195,69 +244,69 @@ namespace GTKWinFormsApp
             Console.WriteLine("textBox1_Validating");
         }
 
-        private void textBox1_Enter(object sender, EventArgs e)
+        private void textBox1_Enter(object? sender, EventArgs e)
         {
             Console.WriteLine("textBox1_Enter");
         }
 
-        private void maskedTextBox2_Validated(object sender, EventArgs e)
+        private void maskedTextBox2_Validated(object? sender, EventArgs e)
         {
             Console.WriteLine("maskedTextBox2_Validated");
         }
 
-        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        private void checkBox2_CheckedChanged(object? sender, EventArgs e)
         {
 
         }
 
-        private void checkBox2_CheckStateChanged(object sender, EventArgs e)
+        private void checkBox2_CheckStateChanged(object? sender, EventArgs e)
         {
 
         }
 
-        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        private void numericUpDown1_ValueChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("numericUpDown1_ValueChanged");
         }
 
-        private void radioButton3_CheckedChanged(object sender, EventArgs e)
+        private void radioButton3_CheckedChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("radioButton3_CheckedChanged");
         }
 
-        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        private void radioButton2_CheckedChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("radioButton2_CheckedChanged");
         }
 
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        private void radioButton1_CheckedChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("radioButton1_CheckedChanged");
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void textBox1_TextChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("textBox1_TextChanged");
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void comboBox1_SelectedIndexChanged(object? sender, EventArgs e)
         {
             Console.WriteLine($"comboBox1_SelectedIndexChanged {comboBox1.SelectedIndex},{comboBox1.SelectedValue},{comboBox1.Text}");
         }
 
-        private void comboBox1_SelectedValueChanged(object sender, EventArgs e)
+        private void comboBox1_SelectedValueChanged(object? sender, EventArgs e)
         {
             var i = comboBox1.SelectedIndex;
             var o = comboBox1.SelectedItem;
             Console.WriteLine("comboBox1_SelectedValueChanged");
         }
 
-        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+        private void dateTimePicker1_ValueChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("dateTimePicker1_ValueChanged");
         }
 
-        private void dataGridView1_SelectionChanged(object sender, EventArgs e)
+        private void dataGridView1_SelectionChanged(object? sender, EventArgs e)
         {
             //6
             //if(dataGridView1.SelectedRows.Count > 0) 
@@ -265,7 +314,7 @@ namespace GTKWinFormsApp
             Console.WriteLine("dataGridView1_SelectionChanged");
         }
 
-        private void dataGridView1_MultiSelectChanged(object sender, EventArgs e)
+        private void dataGridView1_MultiSelectChanged(object? sender, EventArgs e)
         { //1
             Console.WriteLine("dataGridView1_MultiSelectChanged");
         }
@@ -326,12 +375,12 @@ namespace GTKWinFormsApp
             Console.WriteLine("dataGridView1_CellClick");
         }
 
-        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        private void richTextBox1_TextChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("richTextBox1_TextChanged");
         }
 
-        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        private void tabControl1_SelectedIndexChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("tabControl1_SelectedIndexChanged");
         }
@@ -344,7 +393,7 @@ namespace GTKWinFormsApp
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            Console.WriteLine("treeView1_AfterSelect：" + treeView1.SelectedNode.FullPath);
+            Console.WriteLine("treeView1_AfterSelect：" + treeView1.SelectedNode?.FullPath);
             Console.WriteLine("treeView1_AfterSelect：" + e.Node?.Text);
         }
 
@@ -358,12 +407,12 @@ namespace GTKWinFormsApp
 
         }
 
-        private void test2ToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        private void test2ToolStripMenuItem_CheckedChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("test2ToolStripMenuItem_CheckedChanged");
         }
 
-        private void test2ToolStripMenuItem_CheckStateChanged(object sender, EventArgs e)
+        private void test2ToolStripMenuItem_CheckStateChanged(object? sender, EventArgs e)
         {
             Console.WriteLine("test2ToolStripMenuItem_CheckedChanged");
         }
@@ -373,7 +422,7 @@ namespace GTKWinFormsApp
             Console.WriteLine("test2ToolStripMenuItem_DropDownItemClicked");
         }
 
-        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        private void toolStripMenuItem3_Click(object? sender, EventArgs e)
         {
             Console.WriteLine("toolStripMenuItem3_Click");
         }
@@ -383,14 +432,14 @@ namespace GTKWinFormsApp
             Console.WriteLine("toolStripMenuItem3_DropDownItemClicked");
         }
 
-        private void checkedListBox1_SelectedValueChanged(object sender, EventArgs e)
+        private void checkedListBox1_SelectedValueChanged(object? sender, EventArgs e)
         {
             Console.WriteLine($"checkedListBox1_SelectedValueChanged:{sender}");
         }
 
         private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
         {
- 
+
             checkedListBox1.Items[0] = DateTime.Now.ToString();
 
             Console.WriteLine($"checkedListBox1_ItemCheck，{checkedListBox1.Items[0]}: newvalue:{e.NewValue}-oldvalue:{e.CurrentValue}");
@@ -406,8 +455,8 @@ namespace GTKWinFormsApp
 
         private void pictureBox2_Paint(object sender, PaintEventArgs e)
         {
-            Console.WriteLine("pictureBox2_Paint");
-            var g = e.Graphics;
+            //Console.WriteLine("pictureBox2_Paint");
+            var g = e.Graphics!;
             g.Clear(Color.White);
 
             //g.FillRectangle(new SolidBrush(Color.AliceBlue), new Rectangle(0, 0, 100, 50));
@@ -442,35 +491,35 @@ namespace GTKWinFormsApp
 
 
             // Set up string.
-            string measureString = "测量 S3量";
-          
-            Font stringFont = new Font("Microsoft Yahei", 26,FontStyle.Regular);
+            string measureString = "测量 S3量" + mousex;
+
+            Font stringFont = new Font("Microsoft Yahei", 26, FontStyle.Regular);
             // Set maximum layout size.
             SizeF layoutSize = new SizeF(900.0F, 550.0F);
 
             // Set string format.
             StringFormat newStringFormat = new StringFormat();
             newStringFormat.FormatFlags = StringFormatFlags.DirectionVertical;
-            //newStringFormat.LineAlignment = StringAlignment.Center;
-            //newStringFormat.Alignment = StringAlignment.Center;
+            //newStringFormat.LineAlignment = StringAlignment.Far;
+            //newStringFormat.Alignment = StringAlignment.Far;
             // Measure string.
             SizeF stringSize = new SizeF();
-            stringSize = e.Graphics.MeasureString(measureString, stringFont, layoutSize, newStringFormat,out int charactersfitted,out int linesfilled);
-            Console.WriteLine(stringSize.Height);
+            stringSize = e.Graphics!.MeasureString(measureString, stringFont, layoutSize, newStringFormat, out int charactersfitted, out int linesfilled);
+            //Console.WriteLine(stringSize.Height);
             textBox1.Text = $"{charactersfitted},{linesfilled}";
             // Draw rectangle representing size of string.
-            e.Graphics.DrawRectangle(new Pen(Color.Red, 1), 2.0F, 0.0F, stringSize.Width, stringSize.Height);
+            e.Graphics!.DrawRectangle(new Pen(Color.Red, 1), 0.0F, 0.0F, stringSize.Width, stringSize.Height);
 
             // Draw string to screen.
-            e.Graphics.DrawString(measureString, stringFont, Brushes.Black, new PointF(0, 0), newStringFormat);
+            e.Graphics!.DrawString(measureString, stringFont, Brushes.Black, new PointF(0, 0), newStringFormat);
             richTextBox1.AppendText(stringSize.Width.ToString());
 
         }
 
-        private void button6_Click(object sender, EventArgs e)
+        private void button6_Click(object? sender, EventArgs e)
         {
             Console.WriteLine(dataGridView1.Columns[1].DisplayIndex);
-           // textBox1.InsertTextAtCursor("666溜");
+            // textBox1.InsertTextAtCursor("666溜");
             Console.WriteLine(textBox1.SelectionStart);
             Console.WriteLine(textBox1.SelectionLength);
             textBox1.SelectionLength = 20;
@@ -483,7 +532,7 @@ namespace GTKWinFormsApp
             checkedListBox1.Items.Add("dddd");
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void button7_Click(object? sender, EventArgs e)
         {
             Form2 form = new Form2();
             DialogResult result = form.ShowDialog(this);
@@ -497,11 +546,11 @@ namespace GTKWinFormsApp
         private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
         {
             var rect = tabControl1.GetTabRect(e.Index);
-            //e.Graphics.FillRectangle(new SolidBrush(Color.Gray), new Rectangle(rect.X, rect.Y, rect.Width, rect.Height));
-            e.Graphics.FillRectangle(new SolidBrush(Color.DarkBlue), e.Bounds);
+            //e.Graphics!.FillRectangle(new SolidBrush(Color.Gray), new Rectangle(rect.X, rect.Y, rect.Width, rect.Height));
+            e.Graphics!.FillRectangle(new SolidBrush(Color.DarkBlue), e.Bounds);
             var font = new Font(FontFamily.GenericSansSerif, 12);
-            e.Graphics.DrawString($"tab组{e.Index}", font, new SolidBrush(Color.Red), new PointF(0, 0));
-            e.Graphics.DrawImage(Image.FromFile("./Resources/BindingNavigator.Delete.ico"), new Point(e.Bounds.Width - 16, 0));
+            e.Graphics!.DrawString($"tab组{e.Index}", font, new SolidBrush(Color.Red), new PointF(0, 0));
+            e.Graphics!.DrawImage(Image.FromFile("./Resources/BindingNavigator.Delete.ico"), new Point(e.Bounds.Width - 16, 0));
         }
 
         private void button1_Paint(object sender, PaintEventArgs e)
@@ -511,7 +560,7 @@ namespace GTKWinFormsApp
         int idx = 1;
         int step = 1;
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
-        { 
+        {
             //dataGridView1.Rows.Clear();
             //dataGridView1.Rows[idx].Visible = step<0;
             //idx+= step;
@@ -525,12 +574,12 @@ namespace GTKWinFormsApp
             //node.Checked = true;
             //node.EnsureVisible();
             //e.SuppressKeyPress = true;
-            e.Handled = true;
+
         }
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
-     
+            //e.Handled = true;
             Console.WriteLine("textBox1_KeyPress");
             richTextBox1.AppendText("textBox1_KeyPress");
         }
@@ -542,14 +591,19 @@ namespace GTKWinFormsApp
             richTextBox1.AppendText("textBox1_KeyUp");
         }
 
-        private void tabPage2_Click(object sender, EventArgs e)
+        private void tabPage2_Click(object? sender, EventArgs e)
         {
             // MessageBox.Show("ffsssssss");
         }
 
-        private void comboBox1_DropDown(object sender, EventArgs e)
+        private void comboBox1_DropDown(object? sender, EventArgs e)
         {
             Console.WriteLine("comboBox1_DropDown");
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 

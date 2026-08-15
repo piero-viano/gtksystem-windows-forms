@@ -1,5 +1,7 @@
-﻿using Gtk;
+﻿using Gdk;
+using Gtk;
 using System;
+using System.Windows.Forms;
 
 namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
 {
@@ -22,11 +24,15 @@ namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
             contaner.Valign = Align.Fill;
             Gtk.DrawingArea background = new Gtk.DrawingArea();
             background.Events = Gdk.EventMask.EnterNotifyMask;
+            background.Events |= Gdk.EventMask.ButtonPressMask;
+            background.Events |= Gdk.EventMask.ButtonReleaseMask;
             background.Drawn += Background_Drawn;
             contaner.Add(background);
-
+            fixedcontaner.Events &= EventMask.PointerMotionMask;
+            fixedcontaner.Events &= EventMask.ButtonMotionMask;
+            fixedcontaner.Events &= EventMask.ScrollMask;
             fixedcontaner.SizeAllocated += Fixedcontaner_SizeAllocated;
-            fixedcontaner.WidgetEvent += Fixedcontaner_WidgetEvent;
+            fixedcontaner.WidgetEventAfter += Fixedcontaner_WidgetEventAfter;
             fixedcontaner.HscrollbarPolicy = PolicyType.Never;
             fixedcontaner.VscrollbarPolicy = PolicyType.External;
             fixedcontaner.Add(contaner);
@@ -36,16 +42,14 @@ namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
         {
             Override.OnPaint(args.Cr);
         }
-
-        private void Fixedcontaner_WidgetEvent(object o, WidgetEventArgs args)
-        {
-            fixedcontaner.Vadjustment.Value = 20;
-            args.RetVal = true;
-        }
-
         private void Fixedcontaner_SizeAllocated(object o, SizeAllocatedArgs args)
         {
-            fixedcontaner.Vadjustment.Value = 20;
+            contaner.HeightRequest = Math.Max(1, this.HeightRequest - fixedcontaner.MarginStart - fixedcontaner.MarginEnd);
+            fixedcontaner.Vadjustment.Value = 24;
+        }
+        private void Fixedcontaner_WidgetEventAfter(object o, WidgetEventAfterArgs args)
+        {
+            fixedcontaner.Vadjustment.Value = 24;
         }
         public event System.Windows.Forms.ScrollEventHandler Scroll;
         public void Pack(Widget child, Align align, bool expand)

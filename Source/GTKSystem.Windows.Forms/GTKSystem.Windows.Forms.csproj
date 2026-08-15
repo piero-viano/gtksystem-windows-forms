@@ -5,6 +5,8 @@
 	  <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
 	    -->
 	  <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
+	  <DocumentationFile>$(MSBuildProjectDirectory)\$(MSBuildProjectName).xml</DocumentationFile>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	 
 	  <!--aot发布时使用TargetFramework指定单一sdk，net8.0及以上版本-->
 	  <!-- 
@@ -61,6 +63,10 @@ https://github.com/easywebfactory/gtksystem-windows-forms；
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0|AnyCPU'">
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildProjectName).xml" Pack="true" PackagePath="\Documentation.xml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="GTKControls\Interface\**" />

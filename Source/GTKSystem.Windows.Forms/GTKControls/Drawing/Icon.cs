@@ -2,7 +2,6 @@
 using GLib;
 using GTKSystem.Resources;
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.Serialization;
 
 namespace System.Drawing
@@ -11,7 +10,7 @@ namespace System.Drawing
 	{
         #region 只取图像byte[]数据 
         private byte[] _PixbufData;
-        //¡°jpeg¡±, ¡°tiff¡±, ¡°png¡±, ¡°ico¡± or ¡°bmp¡±.
+        //��jpeg��, ��tiff��, ��png��, ��ico�� or ��bmp��.
         public byte[] PixbufData
         {
             get

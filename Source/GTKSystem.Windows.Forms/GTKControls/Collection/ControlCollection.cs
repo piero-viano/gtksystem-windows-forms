@@ -5,6 +5,7 @@
  * author:chenhongjin
  */
 
+using GLib;
 using Gtk;
 using System.Collections;
 using System.ComponentModel;
@@ -42,7 +43,7 @@ namespace System.Windows.Forms
                     lay.HeightRequest = 1;
                     if (__owner is ScrollableControl scrollableControl)
                     {
-                        scrollableControl.UpdatePerformLayout(lay, true);
+                        scrollableControl.PerformLayout(scrollableControl, nameof(scrollableControl.AutoScroll));
                     }
                 }
             }
@@ -53,7 +54,7 @@ namespace System.Windows.Forms
                 {
                     if (__owner is ScrollableControl scrollableControl)
                     {
-                        scrollableControl.UpdatePerformLayout(lay, scrollableControl.AutoScroll);
+                        scrollableControl.PerformLayout(scrollableControl, nameof(scrollableControl.AutoScroll));
                     }
                     List<Control> _tabs = InnerList.ConvertAll<Control>(o => (Control)o);
                     _tabs.Sort(new Comparison<Control>((a, b) => { return a.TabIndex.CompareTo(b.TabIndex); }));
@@ -82,6 +83,8 @@ namespace System.Windows.Forms
                                 statusbar.self.MarginTop = 0;
                                 statusbar.self.MarginEnd = 0;
                                 statusbar.self.MarginBottom = 0;
+                                if (lay.IsRealized)
+                                    statusbar.self.ShowAll();
                                 Gtk.Overlay overlay = new Gtk.Overlay();
                                 overlay.HeightRequest = statusbar.Height;
                                 overlay.AddOverlay(statusbar.self);
@@ -90,12 +93,16 @@ namespace System.Windows.Forms
                         }
                         else if (item is Control control)
                         {
+                            if (lay.IsRealized)
+                                control.Widget.ShowAll();
                             lay.AddOverlay(control.Widget);
                             if (control.Widget is Gtk.Label || control.Widget is Gtk.Button || control.Widget is Gtk.Entry || control.Widget is Gtk.TextView || control.Widget is Gtk.ScrolledWindow)
                                 lay.SetOverlayPassThrough(control.Widget, true);
                         }
                         else if (item is Gtk.Widget widget)
                         {
+                            if (lay.IsRealized)
+                                widget.ShowAll();
                             lay.AddOverlay(widget);
                         }
                     }
@@ -103,10 +110,14 @@ namespace System.Windows.Forms
                     {
                         if (item is Control con)
                         {
+                            if (lay2.IsRealized)
+                                con.Widget.ShowAll();
                             lay2.Put(con.Widget, 0, 0);
                         }
                         else if (item is Gtk.Widget widget)
                         {
+                            if (lay2.IsRealized)
+                                widget.ShowAll();
                             lay2.Put(widget, 0, 0);
                         }
                     }
@@ -277,7 +288,8 @@ namespace System.Windows.Forms
                 {
                     return;
                 }
-                if (InnerList.Remove(value))
+                InnerList.Remove(value);
+                if (__ownerControl.Children.Any(o => o.Equals(value.Widget)))
                     __ownerControl.Remove(value.Widget);
             }
 
@@ -302,7 +314,8 @@ namespace System.Windows.Forms
                 else if (element is ArrangedElementWidget widget)
                 {
                     InnerList.RemoveAt(index);
-                    __ownerControl.Remove(widget.GetWidget);
+                    if (__ownerControl.Children.Any(o => o.Equals(widget.GetWidget)))
+                        __ownerControl.Remove(widget.GetWidget);
                 }
             }
 
@@ -420,7 +433,7 @@ namespace System.Windows.Forms
 
             public void SetBounds(Drawing.Rectangle bounds, BoundsSpecified specified)
             {
-                
+                _control.SetBounds(bounds, specified);
             }
         }
     }

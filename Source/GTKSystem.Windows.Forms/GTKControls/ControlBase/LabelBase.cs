@@ -1,4 +1,7 @@
-﻿namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
+﻿using Gdk;
+using GLib;
+
+namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
 {
     public sealed class LabelBase : Gtk.Label, IControlGtk
     {
@@ -14,8 +17,9 @@
             this.Wrap = true;
             this.LineWrap = true;
             this.LineWrapMode = Pango.WrapMode.WordChar;
+            this.Selectable = true;
+            this.Drawn += LabelBase_Drawn;
         }
-
         public LabelBase(string text) : base(text)
         {
             this.Override = new GtkControlOverride(this);
@@ -27,6 +31,7 @@
             this.Wrap = true;
             this.LineWrap = true;
             this.LineWrapMode = Pango.WrapMode.WordChar;
+            this.Selectable = true;
             this.Drawn += LabelBase_Drawn;
         }
 

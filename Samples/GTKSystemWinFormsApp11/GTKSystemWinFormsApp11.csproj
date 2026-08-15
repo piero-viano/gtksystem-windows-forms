@@ -7,6 +7,8 @@
     <UseWindowsForms>false</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DocumentationFile>$(MSBuildProjectDirectory)\$(MSBuildProjectName).xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
