@@ -19,12 +19,6 @@
     <Compile Update="Form5.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="IconButton.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Update="MDIForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Update="Test1.cs">
       <SubType>Form</SubType>
     </Compile>
