@@ -40,3 +40,6 @@ bin
 /Samples/GTKWinFormsApp/GTKWinFormsApp.xml
 /Source/GTKSystem.Windows.Forms/GTKSystem.Windows.Forms.xml
 /Samples/GTKWinFormsApp/GTKWinFormsApp_Designer.csproj.user
+/Source/System.Resources.Extensions/obj/Release/net6.0/System.Resources.Extensions.AssemblyInfo.cs
+/Source/System.Resources.Extensions/obj/Release/net6.0/System.Resources.Extensions.AssemblyInfoInputs.cache
+/Source/System.Resources.Extensions/obj/Release/net6.0/System.Resources.Extensions.assets.cache
