@@ -340,7 +340,7 @@ namespace System.Drawing
 		}
 
         /// <summary>Populates a <see cref="T:System.Runtime.Serialization.SerializationInfo" /> with the data needed to serialize the target object.</summary>
-        /// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo" /> object to populate with data.</param>
+        /// <param name="si">The <see cref="T:System.Runtime.Serialization.SerializationInfo" /> object to populate with data.</param>
         /// <param name="context">The destination (see <see cref="T:System.Runtime.Serialization.StreamingContext" />) for this serialization.</param>
         void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context)
 		{
@@ -437,7 +437,6 @@ namespace System.Drawing
 			SetNativeImage(nativeImage);
 		}
 
-		/// <summary>Releases all resources used by this <see cref="T:System.Drawing.Image" />.</summary>
 		//public void Dispose()
 		//{
 		//	Dispose(disposing: true);
