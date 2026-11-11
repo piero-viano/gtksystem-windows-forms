@@ -4,11 +4,14 @@
  * 技术支持438865652@qq.com，https://www.gtkapp.com, https://gitee.com/easywebfactory, https://github.com/easywebfactory
  * author:chenhongjin
  */
-using Gtk;
-using GTKSystem.Windows.Forms.Resources;
+
+#pragma warning disable CS0612
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Gtk;
+using GTKSystem.Windows.Forms.Resources;
 
 namespace System.Windows.Forms
 {
@@ -420,7 +423,10 @@ namespace System.Windows.Forms
                         balloonTip.Destroy();
                     }
                 }
-                catch (Exception ex) { }
+                catch (Exception ex)
+                {
+                    Trace.Write(ex);
+                }
                 return false;
             });
             balloonTip.Data.Add("Timeout", handler);
@@ -452,8 +458,13 @@ namespace System.Windows.Forms
                     balloonTip.Dispose();
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                Trace.Write(ex);
+            }
         }
     }
 
 }
+
+#pragma warning restore CS0612

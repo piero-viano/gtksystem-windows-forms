@@ -5,6 +5,8 @@
  * author:chenhongjin
  */
 
+#pragma warning disable CS0612
+
 using Gtk;
 using GTKSystem.Windows.Forms.GTKControls.ControlBase;
 using System.ComponentModel;
@@ -2142,3 +2144,5 @@ namespace System.Windows.Forms
         }
     }
 }
+
+#pragma warning restore CS0612

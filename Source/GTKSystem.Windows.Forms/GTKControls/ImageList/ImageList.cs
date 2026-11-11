@@ -370,6 +370,7 @@ namespace System.Windows.Forms
             }
             catch (Exception ex)
             {
+                Trace.Write(ex);
                 throw;
             }
         }

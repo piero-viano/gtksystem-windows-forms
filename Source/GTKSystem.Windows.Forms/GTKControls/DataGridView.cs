@@ -460,7 +460,6 @@ namespace System.Windows.Forms
                 case DataGridViewSelectionMode.FullRowSelect:
                 case DataGridViewSelectionMode.RowHeaderSelect:
                     return (GridView.Selection.GetSelected(out TreeIter iter) && iter.Equals(rowiter));
-                    break;
                 default:
                     return false;
             }

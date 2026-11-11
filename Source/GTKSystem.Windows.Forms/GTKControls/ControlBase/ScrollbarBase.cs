@@ -1,4 +1,6 @@
-﻿using GLib;
+﻿#pragma warning disable CS0612
+
+using GLib;
 using Gtk;
 using System;
 using System.Drawing;
@@ -29,3 +31,5 @@ namespace GTKSystem.Windows.Forms.GTKControls.ControlBase
         }
     }
 }
+
+#pragma warning restore CS0612

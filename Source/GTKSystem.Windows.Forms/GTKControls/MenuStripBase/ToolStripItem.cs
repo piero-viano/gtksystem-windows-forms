@@ -1,8 +1,11 @@
-﻿using Gtk;
+﻿#pragma warning disable CS0612
+
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms.Layout;
+using Gtk;
 
 namespace System.Windows.Forms
 {
@@ -536,11 +539,16 @@ namespace System.Windows.Forms
                 BackgroundImage?.Dispose();
                 GC.SuppressFinalize(this);
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                Trace.Write(ex);
+            }
             base.Dispose(disposing);
         }
     }
 
 }
+
+#pragma warning restore CS0612
 
 

@@ -1,12 +1,13 @@
-﻿using GTKSystem.Windows.Forms.Resources;
-using System.Collections;
+﻿using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Globalization;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Xml;
+using GTKSystem.Windows.Forms.Resources;
 
 namespace GTKSystem.Resources
 {
@@ -77,7 +78,7 @@ namespace GTKSystem.Resources
             }
             catch (System.Exception ex)
             {
-
+                Trace.Write(ex);
             }
             return result;
         }
