@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='LinkLabel.OnLinkClicked'/> event.
+    ///  Provides data for the <c>LinkLabel.OnLinkClicked</c> event.
     /// </summary>
     [ComVisible(true)]
     public class LinkLabelLinkClickedEventArgs : EventArgs

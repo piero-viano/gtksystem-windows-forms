@@ -5,7 +5,7 @@
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='WebBrowser.OnProgressChanged'/> event.
+    ///  Provides data for the <c>WebBrowser.OnProgressChanged</c> event.
     /// </summary>
     public class WebBrowserProgressChangedEventArgs : EventArgs
     {

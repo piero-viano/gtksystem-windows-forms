@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='TreeView.OnNodeMouseHover'/> event.
+    ///  Provides data for the <c>TreeView.OnNodeMouseHover</c> event.
     /// </summary>
     [ComVisible(true)]
     public class TreeNodeMouseHoverEventArgs : EventArgs

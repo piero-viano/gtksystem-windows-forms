@@ -8,7 +8,7 @@ using System.Globalization;
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='Form.InputLanguageChanging'/> event.
+    ///  Provides data for the <c>Form.InputLanguageChanging</c> event.
     /// </summary>
     public class InputLanguageChangingEventArgs : CancelEventArgs
     {

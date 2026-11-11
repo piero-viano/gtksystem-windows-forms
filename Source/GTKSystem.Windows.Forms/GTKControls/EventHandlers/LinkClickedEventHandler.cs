@@ -5,7 +5,7 @@
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Represents a method that will handle the <see cref='RichTextBox.LinkClicked'/>
+    ///  Represents a method that will handle the <c>RichTextBox.LinkClicked</c>
     ///  event of a <see cref='RichTextBox'/>.
     /// </summary>
     public delegate void LinkClickedEventHandler(object sender, LinkClickedEventArgs e);

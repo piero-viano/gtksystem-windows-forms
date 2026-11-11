@@ -7,7 +7,7 @@ using System.Drawing;
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='RichTextBox.ContentsResized'/> event.
+    ///  Provides data for the <c>RichTextBox.ContentsResized</c> event.
     /// </summary>
     public class ContentsResizedEventArgs : EventArgs
     {

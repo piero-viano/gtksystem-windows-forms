@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='ListView.OnItemDrag'/> event.
+    ///  Provides data for the <c>ListView.OnItemDrag</c> event.
     /// </summary>
     [ComVisible(true)]
     public class ItemDragEventArgs : EventArgs

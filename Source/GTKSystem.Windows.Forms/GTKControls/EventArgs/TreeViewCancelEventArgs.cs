@@ -7,10 +7,10 @@ using System.ComponentModel;
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='TreeView.OnBeforeCheck'/>,
-    ///  <see cref='TreeView.OnBeforeCollapse'/>,
-    ///  <see cref='TreeView.OnBeforeExpand'/>,
-    ///  or <see cref='TreeView.OnBeforeSelect'/> event.
+    ///  Provides data for the <c>TreeView.OnBeforeCheck</c>,
+    ///  <c>TreeView.OnBeforeCollapse</c>,
+    ///  <c>TreeView.OnBeforeExpand</c>,
+    ///  or <c>TreeView.OnBeforeSelect</c> event.
     /// </summary>
     public class TreeViewCancelEventArgs : CancelEventArgs
     {

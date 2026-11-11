@@ -21,19 +21,19 @@ namespace System.Windows.Forms
         public int Msg { get; set; }
 
         /// <summary>
-        ///  Specifies the <see cref='Message.wparam'/> of the message.
+        ///  Specifies the <c>Message.wparam</c> of the message.
         /// </summary>
         public IntPtr WParam { get; set; }
 
         /// <summary>
-        ///  Specifies the <see cref='Message.lparam'/> of the message.
+        ///  Specifies the <c>Message.lparam</c> of the message.
         /// </summary>
         public IntPtr LParam { get; set; }
 
         public IntPtr Result { get; set; }
 
         /// <summary>
-        ///  Gets the <see cref='Message.lparam'/> value, and converts the value to an object.
+        ///  Gets the <c>Message.lparam</c> value, and converts the value to an object.
         /// </summary>
         public object GetLParam(Type cls) => Marshal.PtrToStructure(LParam, cls);
 

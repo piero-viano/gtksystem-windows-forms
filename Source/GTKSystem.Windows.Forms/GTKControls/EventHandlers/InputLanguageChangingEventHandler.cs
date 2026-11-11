@@ -5,7 +5,7 @@
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Represents a method that will handle the <see cref='Form.InputLanguageChanging'/> event of a <see cref='Form'/>.
+    ///  Represents a method that will handle the <c>Form.InputLanguageChanging</c> event of a <see cref='Form'/>.
     /// </summary>
     public delegate void InputLanguageChangingEventHandler(object sender, InputLanguageChangingEventArgs e);
 }

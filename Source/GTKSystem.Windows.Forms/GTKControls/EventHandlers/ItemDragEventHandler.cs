@@ -5,7 +5,7 @@
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Represents a method that will handle the <see cref='ListView.OnItemDrag'/>
+    ///  Represents a method that will handle the <c>ListView.OnItemDrag</c>
     ///  event of a  <see cref='ListView'/>.
     /// </summary>
     public delegate void ItemDragEventHandler(object sender, ItemDragEventArgs e);

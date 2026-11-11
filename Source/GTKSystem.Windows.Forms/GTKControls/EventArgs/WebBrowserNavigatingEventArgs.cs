@@ -7,7 +7,7 @@ using System.ComponentModel;
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='WebBrowser.OnNavigating'/> event.
+    ///  Provides data for the <c>WebBrowser.OnNavigating</c> event.
     /// </summary>
     public class WebBrowserNavigatingEventArgs : CancelEventArgs
     {

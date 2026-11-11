@@ -5,7 +5,7 @@
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for <see cref='TabControl.Selecting'/> and <see cref='TabControl.Selected'/> events.
+    ///  Provides data for <c>TabControl.Selecting</c> and <c>TabControl.Selected</c> events.
     /// </summary>
     public class TabControlEventArgs : EventArgs
     {

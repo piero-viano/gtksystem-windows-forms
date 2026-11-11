@@ -5,7 +5,7 @@
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Represents a method that will handle the <see cref='TreeView.NodeMouseHover'/>
+    ///  Represents a method that will handle the <c>TreeView.NodeMouseHover</c>
     ///  event of a <see cref='TreeView'/>.
     /// </summary>
     public delegate void TreeNodeMouseHoverEventHandler(object sender, TreeNodeMouseHoverEventArgs e);

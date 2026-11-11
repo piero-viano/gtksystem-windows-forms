@@ -5,7 +5,7 @@
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='WebBrowser.OnNavigated'/> event.
+    ///  Provides data for the <c>WebBrowser.OnNavigated</c> event.
     /// </summary>
     public class WebBrowserNavigatedEventArgs : EventArgs
     {

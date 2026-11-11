@@ -5,7 +5,7 @@
 namespace System.Windows.Forms
 {
     /// <summary>
-    ///  Provides data for the <see cref='WebBrowser.OnDocumentCompleted'/> event.
+    ///  Provides data for the <c>WebBrowser.OnDocumentCompleted</c> event.
     /// </summary>
     public class WebBrowserDocumentCompletedEventArgs : EventArgs
     {
