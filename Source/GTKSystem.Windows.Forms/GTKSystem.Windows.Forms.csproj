@@ -37,7 +37,7 @@ https://github.com/easywebfactory/gtksystem-windows-forms；
 	  <LangVersion>latest</LangVersion>
 	  <ImplicitUsings>enable</ImplicitUsings>
 	  <Nullable>annotations</Nullable>
-    <NoWarn>$(NoWarn);CS0649</NoWarn>
+    <NoWarn>$(NoWarn);IDE0031;IDE0038;CS0108;SYSLIB0003;CS3021;CS0618;SYSLIB0050;CA2022;CS8625;IDE0055;CS8073;CS0649;IDE0161;CS0472;CS0473;CS0109;CS0414;SYSLIB</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
