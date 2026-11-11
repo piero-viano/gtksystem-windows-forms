@@ -14,7 +14,7 @@ namespace System.Drawing
 		DisplayFormatControl = 0x20,
 		/// <summary>Fallback to alternate fonts for characters not supported in the requested font is disabled. Any missing characters are displayed with the fonts missing glyph, usually an open square.</summary>
 		NoFontFallback = 0x400,
-		/// <summary>Includes the trailing space at the end of each line. By default the boundary rectangle returned by the <see cref="Overload:System.Drawing.Graphics.MeasureString" /> method excludes the space at the end of each line. Set this flag to include that space in measurement.</summary>
+		/// <summary>Includes the trailing space at the end of each line. By default the boundary rectangle returned by the <see cref="T:System.Drawing.Graphics.MeasureString" /> method excludes the space at the end of each line. Set this flag to include that space in measurement.</summary>
 		MeasureTrailingSpaces = 0x800,
 		/// <summary>Text wrapping between lines when formatting within a rectangle is disabled. This flag is implied when a point is passed instead of a rectangle, or when the specified rectangle has a zero line length.</summary>
 		NoWrap = 0x1000,

@@ -593,14 +593,14 @@ namespace System.Drawing
             }
         }
 
-		/// <summary>Adds a frame to the file or stream specified in a previous call to the <see cref="Overload:System.Drawing.Image.Save" /> method. Use this method to save selected frames from a multiple-frame image to another multiple-frame image.</summary>
+		/// <summary>Adds a frame to the file or stream specified in a previous call to the <see cref="T:System.Drawing.Image.Save" /> method. Use this method to save selected frames from a multiple-frame image to another multiple-frame image.</summary>
 		/// <param name="encoderParams">An <see cref="T:System.Drawing.Imaging.EncoderParameters" /> that holds parameters required by the image encoder that is used by the save-add operation.</param>
 		public void SaveAdd(EncoderParameters encoderParams)
 		{
 			
 		}
 
-		/// <summary>Adds a frame to the file or stream specified in a previous call to the <see cref="Overload:System.Drawing.Image.Save" /> method.</summary>
+		/// <summary>Adds a frame to the file or stream specified in a previous call to the <see cref="T:System.Drawing.Image.Save" /> method.</summary>
 		/// <param name="image">An <see cref="T:System.Drawing.Image" /> that contains the frame to add.</param>
 		/// <param name="encoderParams">An <see cref="T:System.Drawing.Imaging.EncoderParameters" /> that holds parameters required by the image encoder that is used by the save-add operation.</param>
 		/// <exception cref="T:System.ArgumentNullException">

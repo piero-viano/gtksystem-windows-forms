@@ -456,7 +456,7 @@ namespace System.Drawing
 		}
 
 		/// <summary>Updates this <see cref="T:System.Drawing.Region" /> to the union minus the intersection of itself with the specified <see cref="T:System.Drawing.Drawing2D.GraphicsPath" />.</summary>
-		/// <param name="path">The <see cref="T:System.Drawing.Drawing2D.GraphicsPath" /> to <see cref="Overload:System.Drawing.Region.Xor" /> with this <see cref="T:System.Drawing.Region" />.</param>
+		/// <param name="path">The <see cref="T:System.Drawing.Drawing2D.GraphicsPath" /> to <see cref="T:System.Drawing.Region.Xor" /> with this <see cref="T:System.Drawing.Region" />.</param>
 		/// <exception cref="T:System.ArgumentNullException">
 		///   <paramref name="path" /> is <see langword="null" />.</exception>
 		public void Xor(GraphicsPath path)
@@ -464,7 +464,7 @@ namespace System.Drawing
 		}
 
 		/// <summary>Updates this <see cref="T:System.Drawing.Region" /> to the union minus the intersection of itself with the specified <see cref="T:System.Drawing.Rectangle" /> structure.</summary>
-		/// <param name="rect">The <see cref="T:System.Drawing.Rectangle" /> structure to <see cref="Overload:System.Drawing.Region.Xor" /> with this <see cref="T:System.Drawing.Region" />.</param>
+		/// <param name="rect">The <see cref="T:System.Drawing.Rectangle" /> structure to <see cref="T:System.Drawing.Region.Xor" /> with this <see cref="T:System.Drawing.Region" />.</param>
 		public void Xor(Rectangle rect)
 		{
 		}
@@ -476,7 +476,7 @@ namespace System.Drawing
 		}
 
 		/// <summary>Updates this <see cref="T:System.Drawing.Region" /> to the union minus the intersection of itself with the specified <see cref="T:System.Drawing.Region" />.</summary>
-		/// <param name="region">The <see cref="T:System.Drawing.Region" /> to <see cref="Overload:System.Drawing.Region.Xor" /> with this <see cref="T:System.Drawing.Region" />.</param>
+		/// <param name="region">The <see cref="T:System.Drawing.Region" /> to <see cref="T:System.Drawing.Region.Xor" /> with this <see cref="T:System.Drawing.Region" />.</param>
 		/// <exception cref="T:System.ArgumentNullException">
 		///   <paramref name="region" /> is <see langword="null" />.</exception>
 		public void Xor(Region region)

@@ -1,6 +1,6 @@
 namespace System.Drawing.Drawing2D
 {
-	/// <summary>Specifies the type of warp transformation applied in a <see cref="Overload:System.Drawing.Drawing2D.GraphicsPath.Warp" /> method.</summary>
+	/// <summary>Specifies the type of warp transformation applied in a <see cref="T:System.Drawing.Drawing2D.GraphicsPath.Warp" /> method.</summary>
 	public enum WarpMode
 	{
 		/// <summary>Specifies a perspective warp.</summary>
