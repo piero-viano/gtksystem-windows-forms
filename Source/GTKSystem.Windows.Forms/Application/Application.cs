@@ -251,7 +251,7 @@ tooltip label {padding: 0px 10px; color: #555555;}
                 }
 
                 Gtk.Application.Init();
-                App = new Gtk.Application("GtkSystem.Windows.Forms", GLib.ApplicationFlags.None);
+                App = new Gtk.Application("Gtk.Windows.Forms", GLib.ApplicationFlags.None);
                 App.Register(GLib.Cancellable.Current);
                 App.Shutdown += App_Shutdown;
                 var quitAction = new GLib.SimpleAction("quit", null);
